@@ -8,11 +8,10 @@
 #SBATCH --mem=40G                   # Total RAM to be used
 #SBATCH --cpus-per-task=8          # Number of CPU cores
 #SBATCH --gres=gpu:1                # Number of GPUs (per node)
-#SBATCH -p it-hpc                      # Use the gpu partition
 #SBATCH --time=12:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
-python evaluation_cryptic_crosswords.py
+python run_gemma_with_replicate.py &>eval_output1.txt
 
 echo " ending " 
