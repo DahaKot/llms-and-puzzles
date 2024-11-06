@@ -6,7 +6,7 @@ output = replicate.run(
         "top_k": 50,
         "top_p": 0.9,
         "prompt": "Write me a poem about Machine Learning.",
-        "temperature": 0.6,
+        "temperature": 0,
         "max_new_tokens": 512,
         "repetition_penalty": 1.2
     }
