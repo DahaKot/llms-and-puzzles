@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=cryptic_crosswords_starting_point # Job name
+#SBATCH --job-name=cryptic_crosswords_gemma # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -12,6 +12,6 @@
 
 echo "starting Evaluation......................."
 
-python run_gemma_with_replicate.py &>eval_output1.txt
+python gemma_cryptic_crosswords_evaluate.py &>./logs/gemma_naive_random.txt
 
 echo " ending " 
