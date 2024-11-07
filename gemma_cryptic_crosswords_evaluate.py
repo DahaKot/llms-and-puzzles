@@ -1,57 +1,59 @@
-from typing import List, Dict
+from typing import Dict
 import prompts_list
-import json
 import torch
 from transformers import pipeline
 from tqdm import tqdm
+from utils import get_dataset_with_prompts
 
-prompts = prompts_list.cryptic_crosswords_prompts
+from torch.utils.data import DataLoader
+from args_parser import get_args
+from vllm import LLM, SamplingParams
 
-with open("./naive_random.json", "r") as file:
-    dataset = json.load(file)["test"]
+if __name__ == "__main__":
+    args = get_args()
 
-pipe = pipeline(
-    "text-generation",
-    model="google/gemma-2-9b-it",
-    model_kwargs={"torch_dtype": torch.bfloat16},
-    device="cuda",
-)
+    prompt = prompts_list.cryptic_crosswords_prompts[args.prompt_name]
 
-# Function to evaluate a model with a specific prompt
-def evaluate_model_on_prompt(prompt: str, log_file) -> float:
+    dataset = get_dataset_with_prompts("boda/guardian_naive_random", args.prompt_name)
+    dataset_length = len(dataset)
+    dataloader = DataLoader(dataset, batch_size=args.batch_size)
+
+    model = LLM(
+        model="google/gemma-2-9b-it",
+        max_model_len=256
+    )
+    tokenizer = model.get_tokenizer()
+
+    sampling_params = SamplingParams(
+        temperature=0.0, top_p=1, max_tokens=256,
+        stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+    )
+
     correct_count = 0
-    for item in tqdm(dataset):
-        clue = item["clue"]
-        correct_answer = item["soln_with_spaces"]
-        # Generate the full prompt with the clue
-        full_prompt = prompt.format(clue=clue)
-        messages = [
-            {"role": "user", "content": full_prompt},
-	]
+    clues, correct_answers, predictions = [], [], []
 
-        outputs = pipe(messages, max_new_tokens=64)
-        model_answer = outputs[0]["generated_text"][-1]["content"].strip()
+    for batch in tqdm(dataloader):
+        batch_clues = batch["input"]
+        batch_correct_answers = batch["target"]
+        batch_prompts = batch["prompt"]
 
-        log_file.write("Clue: " + clue + "\nAnswer: " + model_answer + "\nCorrect Answer: " + correct_answer + "\n")
+        batch_predictions = model.generate(batch_prompts, sampling_params, use_tqdm=False)
 
-        # Check if the model's answer matches the correct answer
-        if correct_answer.lower() in model_answer.lower():
-            correct_count += 1
+        for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
+            model_prediction = prediction.outputs[0].text.lower()
 
-    # Calculate accuracy for this prompt and model
-    accuracy = correct_count / len(dataset)
-    return accuracy
+            if correct_answer.lower() in model_prediction:
+                correct_count += 1
 
-# Run evaluation
-results: Dict[str, float] = {}
-for prompt_name, prompt in prompts.items():
-    log_file = open("./logs/gemma" + "_" + prompt_name + ".txt", "w")
+        clues.extend(batch_clues)
+        correct_answers.extend(batch_correct_answers)
+        predictions.aextend(batch_predictions)
 
-    accuracy = evaluate_model_on_prompt(prompt, log_file)
-    results[prompt_name] = accuracy
-    print(f"Gemma, {prompt_name} prompt, Accuracy: {accuracy:.2%}")
+    accuracy = correct_count / dataset_length
 
-# Display final results
-print("\nOverall Results:")
-for prompt_name, accuracy in results.items():
-    print(f"Gemma with {prompt_name}: {accuracy:.2%}")
+    log_file = open("./logs/" + args.run_name + ".txt")
+    log_file.write(args.prompt_name + " prompt; model: google/gemma-2-9b-it")
+
+    for clue, correct_answer, prediction in zip(clues, correct_answers, predictions):
+        log_file.write("Clue: " + clue + "\Prediction: " + prediction + "\nCorrect Answer: " + correct_answer + "\n")
+
