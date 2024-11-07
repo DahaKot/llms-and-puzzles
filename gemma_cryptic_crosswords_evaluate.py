@@ -20,7 +20,8 @@ if __name__ == "__main__":
 
     model = LLM(
         model="google/gemma-2-9b-it",
-        max_model_len=256
+        max_model_len=256,
+        dtype="float16"
     )
     tokenizer = model.get_tokenizer()
 
@@ -38,16 +39,18 @@ if __name__ == "__main__":
         batch_prompts = batch["prompt"]
 
         batch_predictions = model.generate(batch_prompts, sampling_params, use_tqdm=False)
+        text_predictions = []
 
         for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
             model_prediction = prediction.outputs[0].text.lower()
+            text_predictions.append(model_prediction)
 
             if correct_answer.lower() in model_prediction:
                 correct_count += 1
 
         clues.extend(batch_clues)
         correct_answers.extend(batch_correct_answers)
-        predictions.aextend(batch_predictions)
+        predictions.extend(text_predictions)
 
     accuracy = correct_count / dataset_length
 
