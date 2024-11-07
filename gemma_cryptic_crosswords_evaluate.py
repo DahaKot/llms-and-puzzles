@@ -48,11 +48,11 @@ if __name__ == "__main__":
 
         clues.extend(batch_clues)
         correct_answers.extend(batch_correct_answers)
-        predictions.aextend(batch_predictions)
+        predictions.extend(batch_predictions)
 
     accuracy = correct_count / dataset_length
 
-    log_file = open("./logs/" + args.run_name + ".txt")
+    log_file = open("./logs/" + args.run_name + ".txt", "w")
     log_file.write(args.prompt_name + " prompt; model: google/gemma-2-9b-it")
 
     for clue, correct_answer, prediction in zip(clues, correct_answers, predictions):
