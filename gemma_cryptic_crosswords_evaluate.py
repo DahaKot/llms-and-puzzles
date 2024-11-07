@@ -20,7 +20,8 @@ if __name__ == "__main__":
 
     model = LLM(
         model="google/gemma-2-9b-it",
-        max_model_len=256
+        max_model_len=256,
+        dtype="float16"
     )
     tokenizer = model.get_tokenizer()
 

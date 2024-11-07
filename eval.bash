@@ -12,6 +12,6 @@
 
 echo "starting Evaluation......................."
 
-python gemma_cryptic_crosswords_evaluate.py &>./logs/gemma_naive_random.txt
+python gemma_cryptic_crosswords_evaluate.py --run_name="replicating_paper_results1"
 
 echo " ending " 
