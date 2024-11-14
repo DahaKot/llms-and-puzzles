@@ -19,7 +19,7 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
     model = LLM(
-        model="google/gemma-2-9b-it",
+        model="meta-llama/Llama-3.1-8B-Instruct",
         max_model_len=256,
         dtype="float16"
     )
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     accuracy = correct_count / dataset_length
 
     log_file = open("./logs/" + args.run_name + ".txt", "w")
-    log_file.write(args.prompt_name + " prompt; model: google/gemma-2-9b-it; accuracy: " + str(accuracy) + "\n")
+    log_file.write(args.prompt_name + " prompt; model: meta-llama/Llama-3.1-8B-Instruct; accuracy: " + str(accuracy) + "\n")
 
     for clue, correct_answer, prediction in zip(clues, correct_answers, predictions):
         log_file.write("Clue: " + clue + "\nPrediction: " + prediction + "\nCorrect Answer: " + correct_answer + "\n")
