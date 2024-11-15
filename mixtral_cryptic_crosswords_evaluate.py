@@ -9,6 +9,12 @@ from torch.utils.data import DataLoader
 from args_parser import get_args
 from vllm import LLM, SamplingParams
 
+from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
+from mistral_common.protocol.instruct.messages import UserMessage
+from mistral_common.protocol.instruct.request import ChatCompletionRequest
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 if __name__ == "__main__":
     args = get_args()
 
@@ -18,12 +24,8 @@ if __name__ == "__main__":
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
-    model = LLM(
-        model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-        max_model_len=256,
-        dtype="float16"
-    )
-    tokenizer = model.get_tokenizer()
+    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", load_in_4bit=True)
+    tokenizer = MistralTokenizer.v1()
 
     sampling_params = SamplingParams(
         temperature=0.0, top_p=1, max_tokens=256,
@@ -38,11 +40,16 @@ if __name__ == "__main__":
         batch_correct_answers = batch["target"]
         batch_prompts = batch["prompt"]
 
-        batch_predictions = model.generate(batch_prompts, sampling_params, use_tqdm=False)
+        tokens = []
+        for prompt in batch_prompts:
+            completion_request = ChatCompletionRequest(messages=[UserMessage(content=prompt)])
+            tokens.append(tokenizer.encode_chat_completion(completion_request).tokens)
+
+        batch_predictions = model.generate(tokens, max_new_tokens=500, do_sample=False)
         text_predictions = []
 
         for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
-            model_prediction = prediction.outputs[0].text.lower().strip()
+            model_prediction = tokenizer.decode(prediction[0].tolist()).lower().strip()
             text_predictions.append(model_prediction)
 
             if correct_answer.lower() in model_prediction:
