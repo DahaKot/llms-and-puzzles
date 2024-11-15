@@ -24,13 +24,8 @@ if __name__ == "__main__":
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", load_in_4bit=True)
+    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", device_map="balanced_low_0")
     tokenizer = MistralTokenizer.v1()
-
-    sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=256,
-        stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
-    )
 
     correct_count = 0
     clues, correct_answers, predictions = [], [], []
