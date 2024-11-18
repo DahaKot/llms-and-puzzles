@@ -24,8 +24,8 @@ if __name__ == "__main__":
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", device_map="balanced_low_0")
-    tokenizer = MistralTokenizer.v1()
+    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.3", device_map="balanced_low_0")
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.3")
 
     correct_count = 0
     clues, correct_answers, predictions = [], [], []
@@ -35,12 +35,7 @@ if __name__ == "__main__":
         batch_correct_answers = batch["target"]
         batch_prompts = batch["prompt"]
 
-        tokens = []
-        for prompt in batch_prompts:
-            completion_request = ChatCompletionRequest(messages=[UserMessage(content=prompt)])
-            tokens.append(torch.tensor(tokenizer.encode_chat_completion(completion_request).tokens))
-        
-        tokens = torch.stack(tokens, dim=0)
+        tokens = tokenizer(batch_prompts)
 
         batch_predictions = model.generate(tokens, max_new_tokens=500, do_sample=False)
         text_predictions = []
