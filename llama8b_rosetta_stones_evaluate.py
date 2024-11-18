@@ -9,12 +9,6 @@ from torch.utils.data import DataLoader
 from args_parser import get_args
 from vllm import LLM, SamplingParams
 
-from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
-from mistral_common.protocol.instruct.messages import UserMessage
-from mistral_common.protocol.instruct.request import ChatCompletionRequest
-
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
 if __name__ == "__main__":
     args = get_args()
 
@@ -24,8 +18,17 @@ if __name__ == "__main__":
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", device_map="balanced_low_0")
-    tokenizer = MistralTokenizer.v1()
+    model = LLM(
+        model="meta-llama/Llama-3.1-8B-Instruct",
+        max_model_len=256,
+        dtype="float16"
+    )
+    tokenizer = model.get_tokenizer()
+
+    sampling_params = SamplingParams(
+        temperature=0.0, top_p=1, max_tokens=256,
+        stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+    )
 
     correct_count = 0
     clues, correct_answers, predictions = [], [], []
@@ -35,18 +38,11 @@ if __name__ == "__main__":
         batch_correct_answers = batch["target"]
         batch_prompts = batch["prompt"]
 
-        tokens = []
-        for prompt in batch_prompts:
-            completion_request = ChatCompletionRequest(messages=[UserMessage(content=prompt)])
-            tokens.append(torch.tensor(tokenizer.encode_chat_completion(completion_request).tokens))
-        
-        tokens = torch.stack(tokens, dim=0)
-
-        batch_predictions = model.generate(tokens, max_new_tokens=500, do_sample=False)
+        batch_predictions = model.generate(batch_prompts, sampling_params, use_tqdm=False)
         text_predictions = []
 
         for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
-            model_prediction = tokenizer.decode(prediction[0].tolist()).lower().strip()
+            model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
             if correct_answer.lower() in model_prediction:
@@ -59,7 +55,7 @@ if __name__ == "__main__":
     accuracy = correct_count / dataset_length
 
     log_file = open("./logs/" + args.run_name + ".txt", "w")
-    log_file.write(args.prompt_name + " prompt; model: mistralai/Mixtral-8x7B-Instruct-v0.1; accuracy: " + str(accuracy) + "\n")
+    log_file.write(args.prompt_name + " prompt; model: meta-llama/Llama-3.1-8B-Instruct; accuracy: " + str(accuracy) + "\n")
 
     for clue, correct_answer, prediction in zip(clues, correct_answers, predictions):
         log_file.write("Clue: " + clue + "\nPrediction: " + prediction + "\nCorrect Answer: " + correct_answer + "\n")
