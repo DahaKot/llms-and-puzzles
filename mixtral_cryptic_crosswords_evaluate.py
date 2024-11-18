@@ -40,7 +40,7 @@ if __name__ == "__main__":
             completion_request = ChatCompletionRequest(messages=[UserMessage(content=prompt)])
             tokens.append(tokenizer.encode_chat_completion(completion_request).tokens)
         
-        tokens = torch.cat(tokens)
+        tokens = torch.stack(tokens, dim=0)
 
         batch_predictions = model.generate(tokens, max_new_tokens=500, do_sample=False)
         text_predictions = []
