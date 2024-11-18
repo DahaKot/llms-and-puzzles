@@ -22,7 +22,8 @@ if __name__ == "__main__":
     model = LLM(
         model="meta-llama/Llama-3.1-8B-Instruct",
         max_model_len=256,
-        dtype="float16"
+        dtype="float16",
+        tensor_parallel_size=2
     )
     tokenizer = model.get_tokenizer()
 
