@@ -16,4 +16,19 @@ answer:
 '''
 }
 
-rosetta_stone_prompts = {"base": ''''''}
+rosetta_stone_prompts = {"base": '''Here are some expressions in <<LANG>> (a never-seen-before foreign language) and their translations in English:
+
+<<DATA>>
+
+Given the above examples, please translate the following expression.
+
+<<QUESTION>>
+''',
+"advanced": '''This is a translation puzzle. Below are example phrases in <<LANG>> (a never-seen-before foreign language) as well as their English translations. Some test phrases follow them. Your task is to look closely at the example phrases and use only the information from them to translate the test phrases.
+
+<<DATA>>
+
+Given the above examples, please translate the following expression.
+
+<<QUESTION>>
+'''}

@@ -1,20 +1,21 @@
 from typing import Dict
 import prompts_list
 import torch
+import json
 from transformers import pipeline
 from tqdm import tqdm
-from utils import get_dataset_with_prompts
+from utils import get_dataset_with_prompts, get_rosetta_stone_dataset_with_prompts
 
 from torch.utils.data import DataLoader
 from args_parser import get_args
 from vllm import LLM, SamplingParams
 
+from rosetta_stone_prompting import PromptBuilder
+
 if __name__ == "__main__":
     args = get_args()
 
-    prompt = prompts_list.cryptic_crosswords_prompts[args.prompt_name]
-
-    dataset = get_dataset_with_prompts("boda/guardian_naive_random", args.prompt_name)
+    dataset = get_rosetta_stone_dataset_with_prompts("./data/rosetta_stone/ModeLing_v2.json", args.prompt_name)
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
