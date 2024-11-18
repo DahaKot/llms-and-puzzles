@@ -15,3 +15,5 @@ clue:
 answer:
 '''
 }
+
+rosetta_stone_prompts = {"base": ''''''}
