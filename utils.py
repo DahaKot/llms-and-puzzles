@@ -97,19 +97,8 @@ def get_dataset_with_prompts(dataset_path, prompt_name="base"):
     return mapped_dataset
 
 def get_rosetta_stone_dataset_with_prompts(dataset_path, prompt_name="base"):
-    dataset = json.load(open(dataset_path, 'r'))
+    dataset = json.load(open(dataset_path, "r", encoding="utf8"))
     prompt_builder = PromptBuilder(prompt_name)
-
-    for d in dataset:
-        d["data"] = [normalize_unicode(t) for t in d["data"]]
-        d["questions"] = [normalize_unicode(t) for t in d["questions"]]
-        d["answers"] = [normalize_unicode(t) for t in d["answers"]]
-        for i in range(len(d["cleaned_data"]["data"])):
-            d["cleaned_data"]["data"][i][1][1] = normalize_unicode(d["cleaned_data"]["data"][i][1][1])
-            d["cleaned_data"]["data"][i][2][1] = normalize_unicode(d["cleaned_data"]["data"][i][2][1])
-        for i in range(len(d["cleaned_data"]["qna"])):
-            d["cleaned_data"]["qna"][i][1][1] = normalize_unicode(d["cleaned_data"]["qna"][i][1][1])
-            d["cleaned_data"]["qna"][i][2][1] = normalize_unicode(d["cleaned_data"]["qna"][i][2][1])
 
     samples = []
     for d in dataset:
