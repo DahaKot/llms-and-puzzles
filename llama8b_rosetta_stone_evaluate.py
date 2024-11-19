@@ -21,14 +21,14 @@ if __name__ == "__main__":
 
     model = LLM(
         model="meta-llama/Llama-3.1-8B-Instruct",
-        max_model_len=256,
+        # max_model_len=256,
         dtype="float16",
-        tensor_parallel_size=2
+        # tensor_parallel_size=2
     )
     tokenizer = model.get_tokenizer()
 
     sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=256,
+        temperature=0.0, top_p=1, max_tokens=512,
         stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
     )
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         text_predictions = []
 
         for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
-            model_prediction = prediction.outputs[0].text.lower().strip()
+            model_prediction = "\n".join([line.text.lower().strip() for line in prediction.outputs])
             text_predictions.append(model_prediction)
 
             if correct_answer.lower() in model_prediction:

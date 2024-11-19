@@ -35,7 +35,7 @@ if __name__ == "__main__":
         batch_correct_answers = batch["target"]
         batch_prompts = batch["prompt"]
 
-        tokens = tokenizer(batch_prompts).input_ids
+        tokens = torch.tensor(tokenizer(batch_prompts).input_ids)
 
         batch_predictions = model.generate(tokens, max_new_tokens=500, do_sample=False)
         text_predictions = []

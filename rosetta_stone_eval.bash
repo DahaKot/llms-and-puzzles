@@ -9,11 +9,11 @@
 #SBATCH --cpus-per-task=8          # Number of CPU cores
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
-#SBATCH --gres=gpu:2                # Number of GPUs (per node)
+#SBATCH --gres=gpu:1                # Number of GPUs (per node)
 #SBATCH --time=12:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
-python llama8b_rosetta_stone_evaluate.py --run_name="llama8b_rosetta_stone_base" --prompt_name="base"
+python llama8b_rosetta_stone_evaluate.py --run_name="llama8b_rosetta_stone_base_max_tokens_512" --prompt_name="base" --batch_size=8
 
 echo " ending " 
