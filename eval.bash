@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=cryptic_crosswords_mixtral_4gpus # Job name
+#SBATCH --job-name=cryptic_crosswords_mixtral_tokens # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -14,6 +14,6 @@
 
 echo "starting Evaluation......................."
 
-python mixtral_cryptic_crosswords_evaluate.py --run_name="mixtral_cryptic_crosswords_base_4gpus" --prompt_name="base"
+python mixtral_cryptic_crosswords_evaluate.py --run_name="mixtral_cryptic_crosswords_base_tokens" --prompt_name="base" --batch_size=8
 
 echo " ending " 

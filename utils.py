@@ -119,7 +119,7 @@ def get_rosetta_stone_dataset_with_prompts(dataset_path, prompt_name="base"):
             message = prompt_builder.build_prompt_message(data, qna_row=row, qna_whole=qna)
             samples.append({
                 "prompt": message,
-                "target": row[1][1],
+                "target": row[2][1],
                 "input": message
             })
 
