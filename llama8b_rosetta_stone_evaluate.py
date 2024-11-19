@@ -28,7 +28,7 @@ if __name__ == "__main__":
     tokenizer = model.get_tokenizer()
 
     sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=512,
+        temperature=0.0, max_tokens=512,
         stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
     )
 
@@ -44,7 +44,9 @@ if __name__ == "__main__":
         text_predictions = []
 
         for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
-            model_prediction = "\n".join([line.text.lower().strip() for line in prediction.outputs])
+            # print("outputs: ", prediction.outputs)
+            # model_prediction = "\n".join([line.text.lower().strip() for line in prediction.outputs])
+            model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
             if correct_answer.lower() in model_prediction:

@@ -20,13 +20,13 @@ if __name__ == "__main__":
 
     model = LLM(
         model="meta-llama/Llama-3.1-8B-Instruct",
-        max_model_len=256,
+        # max_model_len=256,
         dtype="float16"
     )
     tokenizer = model.get_tokenizer()
 
     sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=256,
+        temperature=0.0, top_p=1, max_tokens=512,
         stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
     )
 
