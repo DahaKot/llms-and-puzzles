@@ -24,8 +24,15 @@ if __name__ == "__main__":
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1", device_map="balanced_low_0")
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mixtral-8x7B-Instruct-v0.1")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print("Device: ", device)
+
+    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.1-8B-Instruct", torch_dtype=torch.float16, device_map="auto")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct", padding_side="left")
+    tokenizer.pad_token = tokenizer.eos_token
+    model.generation_config.pad_token_id = tokenizer.eos_token_id
+
+    print("model device: ", model.device)
 
     correct_count = 0
     clues, correct_answers, predictions = [], [], []
@@ -35,21 +42,30 @@ if __name__ == "__main__":
         batch_correct_answers = batch["target"]
         batch_prompts = batch["prompt"]
 
-        tokens = torch.tensor(tokenizer(batch_prompts, padding=True).input_ids)
+        encoded_inputs = tokenizer(batch_prompts, padding=True, truncation=True, return_tensors="pt")
+        input_ids = encoded_inputs["input_ids"].to(device)
+        attention_mask = encoded_inputs["attention_mask"].to(device)
+        
+        print("before generation")
 
-        batch_predictions = model.generate(tokens, max_new_tokens=512, do_sample=False)
+        batch_predictions = model.generate(
+            input_ids=input_ids, attention_mask=attention_mask, max_new_tokens=512,
+            do_sample=False, top_p=1.0
+        )
         text_predictions = []
 
-        for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
-            model_prediction = tokenizer.decode(prediction[0].tolist()).lower().strip()
-            text_predictions.append(model_prediction)
+        # prediction = tokenizer.batch_decode(batch_predictions, skip_special_tokens=True)
 
-            if correct_answer.lower() in model_prediction:
-                correct_count += 1
+        # for clue, prediction, correct_answer in zip(batch_clues, batch_predictions, batch_correct_answers):
+        #    model_prediction = tokenizer.decode(prediction[0].tolist(), skip_special_tokens=True).lower().strip()
+        #    text_predictions.append(model_prediction)
+
+        #    if correct_answer.lower() in model_prediction:
+        #        correct_count += 1
 
         clues.extend(batch_clues)
         correct_answers.extend(batch_correct_answers)
-        predictions.extend(text_predictions)
+        predictions.append(batch_predictions)
 
     accuracy = correct_count / dataset_length
 
