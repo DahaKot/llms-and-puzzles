@@ -22,7 +22,7 @@ if __name__ == "__main__":
         model="meta-llama/Meta-Llama-3.1-70B-Instruct",
         # max_model_len=256,
         dtype="float16",
-        tensor_parallel_size=4
+        tensor_parallel_size=2
     )
     tokenizer = model.get_tokenizer()
 
