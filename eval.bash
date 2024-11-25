@@ -9,11 +9,11 @@
 #SBATCH --cpus-per-task=8          # Number of CPU cores
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
-#SBATCH --gres=gpu:4                # Number of GPUs (per node)
+#SBATCH --gres=gpu:2                # Number of GPUs (per node)
 #SBATCH --time=12:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
-python llama70b_cryptic_crosswords_evaluate.py --run_name="llama70b_cryptic_crosswords_base" --prompt_name="base" --batch_size=8
+python llama70b_cryptic_crosswords_evaluate.py --run_name="llama70b_cryptic_crosswords_base_2gpus" --prompt_name="base" --batch_size=8
 
 echo " ending " 
