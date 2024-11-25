@@ -11,13 +11,12 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction for a in correct_answers])
 
-
-def generate_prompt(example, dataset="cryptic crosswords", prompt_name="base"):
+def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     clue = example['input']
 
-    if dataset == "cryptic crosswords":
+    if dataset == "cryptic_crosswords":
         prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
-    elif dataset == "logic puzzles":
+    elif dataset == "logic_puzzles":
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
 
     example["prompt"] = prompt.format(clue=clue)
@@ -26,7 +25,7 @@ def generate_prompt(example, dataset="cryptic crosswords", prompt_name="base"):
 
 
 def get_dataset_with_prompts(dataset_name, prompt_name="base"):
-    if dataset_name == "cryptic crosswords":
+    if dataset_name == "cryptic_crosswords":
         dataset = load_dataset("boda/guardian_naive_random", split="test")
 
         mapped_dataset = dataset.map(
