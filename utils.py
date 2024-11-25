@@ -4,6 +4,53 @@ import re
 import json
 import pandas as pd
 
+
+def generate_prompt(example, dataset="cryptic crosswords", prompt_name="base"):
+    clue = example['input']
+
+    if dataset == "cryptic crosswords":
+        prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+    elif dataset == "logic puzzles":
+        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
+
+    example["prompt"] = prompt.format(clue=clue)
+
+    return example
+
+def get_dataset_with_prompts(dataset_name, prompt_name="base"):
+    if dataset_name == "cryptic crosswords":
+        dataset = load_dataset("boda/guardian_naive_random", split="test")
+
+        mapped_dataset = dataset.map(
+            generate_prompt,
+            fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
+            load_from_cache_file=True
+        )
+            
+        return mapped_dataset
+    elif dataset_name == "rosetta_stone":
+        dataset = json.load(open(
+            "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
+        ))
+        prompt_builder = PromptBuilder(prompt_name)
+
+        samples = []
+        for d in dataset:
+            data = d["cleaned_data"]["data"]
+            qna = d["cleaned_data"]["qna"]
+            for row in qna:
+                message = prompt_builder.build_prompt_message(
+                    data, qna_row=row, qna_whole=qna
+                )
+                samples.append({
+                    "prompt": message,
+                    "target": row[2][1],
+                    "input": message
+                })
+
+        return Dataset.from_list(samples)
+    
+# the code is taken from KV Aditya Srivatsa and Mukund Choudhary
 class PromptBuilder:
     def __init__(self, prompt_name):
         self.task_prompt_template = prompts_list.rosetta_stone_prompts[prompt_name]
@@ -78,38 +125,4 @@ def normalize_unicode(s):
         s = s.replace(f"\\u{x}", chr(int(x, 16)))
     return s
 
-def generate_prompt(example, prompt_name="base"):
-    clue = example['input']
 
-    prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
-    example["prompt"] = prompt.format(clue=clue)
-
-    return example
-
-def get_dataset_with_prompts(dataset_path, prompt_name="base"):
-    dataset = load_dataset(dataset_path, split="test")
-
-    mapped_dataset = dataset.map(
-        generate_prompt, fn_kwargs={"prompt_name": prompt_name},
-        load_from_cache_file=True
-    )
-        
-    return mapped_dataset
-
-def get_rosetta_stone_dataset_with_prompts(dataset_path, prompt_name="base"):
-    dataset = json.load(open(dataset_path, "r", encoding="utf8"))
-    prompt_builder = PromptBuilder(prompt_name)
-
-    samples = []
-    for d in dataset:
-        data = d["cleaned_data"]["data"]
-        qna = d["cleaned_data"]["qna"]
-        for row in qna:
-            message = prompt_builder.build_prompt_message(data, qna_row=row, qna_whole=qna)
-            samples.append({
-                "prompt": message,
-                "target": row[2][1],
-                "input": message
-            })
-
-    return Dataset.from_list(samples)

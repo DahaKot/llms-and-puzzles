@@ -32,3 +32,21 @@ Given the above examples, please translate the following expression.
 
 <<QUESTION>>
 '''}
+
+logic_puzzles_prompts = {"base": '''{problem}
+Possible answers:
+{options}
+Please, outout the number of the correct answer only:
+''',
+"advanced": '''You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
+The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
+The wordplay gives some instructions on how to get to the answer in another (less literal) way.
+The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
+Extract the definiton and the wordplay in the clue, and use them to solve the clue. Finally, output the answer on this format:
+answer:
+<answer>,
+clue:
+{clue}
+answer:
+'''
+}
