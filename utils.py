@@ -25,6 +25,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
 
 def get_dataset_with_prompts(dataset_name, prompt_name="base"):
     if dataset_name == "cryptic_crosswords":
+        print("dataset is cryptic crosswords")
         dataset = load_dataset("boda/guardian_naive_random", split="test")
 
         mapped_dataset = dataset.map(
