@@ -3,7 +3,7 @@ import prompts_list
 import torch
 from transformers import pipeline
 from tqdm import tqdm
-from utils import get_dataset_with_prompts
+from utils import get_dataset_with_prompts, exact_match
 
 from torch.utils.data import DataLoader
 from args_parser import get_args
@@ -47,7 +47,7 @@ if __name__ == "__main__":
             model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
-            if correct_answer.lower() in model_prediction:
+            if exact_match(model_prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone")):
                 correct_count += 1
 
         inputs.extend(batch_inputs)
