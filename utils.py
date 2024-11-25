@@ -4,6 +4,12 @@ import re
 import json
 import pandas as pd
 
+def exact_match(prediction, correct_answer, multiple_answers=False):
+    if not multiple_answers:
+        return correct_answer.lower() in prediction
+    else:
+        correct_answers = json.loads(correct_answer)
+        return any([a.lower() in prediction for a in correct_answers])
 
 def generate_prompt(example, dataset="cryptic crosswords", prompt_name="base"):
     clue = example['input']
@@ -45,9 +51,38 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                 )
                 samples.append({
                     "prompt": message,
-                    "target": row[2][1],
-                    "input": message
+                    "target": json.dumps([row[2][1]]),
+                    "input": message,
+                    "dataset": "ModeLing"
                 })
+
+        dataset = json.load(open(
+            "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
+        ))
+
+        for d in dataset:
+            data = d["data"]
+            qna = d["qna"]
+            for row in qna:
+                message = prompt_builder.build_prompt_message(
+                    data, qna_row=row, qna_whole=qna
+                )
+
+                target = row[2][1]
+                if type(target) is not list:
+                    samples.append({
+                        "prompt": message,
+                        "target": json.dumps([target]),
+                        "input": message,
+                        "dataset": "LingOly"
+                    })
+                else:
+                    samples.append({
+                        "prompt": message,
+                        "target": json.dumps(target),
+                        "input": message,
+                        "dataset": "LingOly"
+                    })
 
         return Dataset.from_list(samples)
     
