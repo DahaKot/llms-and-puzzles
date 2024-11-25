@@ -14,6 +14,10 @@
 
 echo "starting Evaluation......................."
 
-python mixtral_cryptic_crosswords_evaluate_vllm.py --run_name="mixtral_cryptic_crosswords_base_mixtral_instruct" --prompt_name="base_mixtral_instruct" --batch_size=8
+# python mixtral_cryptic_crosswords_evaluate_vllm.py --run_name="mixtral_cryptic_crosswords_base_mixtral_instruct" --prompt_name="base_mixtral_instruct" --batch_size=8
+
+python inference.py --run_name="llama8b_cryptic_crosswords_base" \
+    --batch_size=8 --dataset="cryptic_crosswords" --model="llama8b" \
+    --prompt_name="base"
 
 echo " ending " 

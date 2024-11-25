@@ -28,6 +28,7 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
         )
             
         return mapped_dataset
+    
     elif dataset_name == "rosetta_stone":
         dataset = json.load(open(
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
