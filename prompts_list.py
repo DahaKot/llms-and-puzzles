@@ -7,13 +7,29 @@ answer:
 The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
 The wordplay gives some instructions on how to get to the answer in another (less literal) way.
 The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
-Extract the definiton and the wordplay in the clue, and use them to solve the clue. Finally, output the answer on this format:
+Extract the definiton and the wordplay in the clue, and use them to solve the clue. Finally, output the answer in this format:
 answer:
 <answer>,
 clue:
 {clue}
 answer:
-'''
+''',
+"base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a clue for a cryptic crossword. Output only the answer.
+clue:
+{clue}
+answer:
+[/INST]''',
+"advanced_mixtral_instruct": '''[INST] You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
+The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
+The wordplay gives some instructions on how to get the answer in another (less literal) way.
+The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
+Extract the definition and the wordplay in the clue, and use them to solve the clue. Finally, output the answer in this format:
+answer:
+<answer>,
+clue:
+{clue}
+answer:
+[/INST]'''
 }
 
 rosetta_stone_prompts = {"base": '''Here are some expressions in <<LANG>> (a never-seen-before foreign language) and their translations in English:
