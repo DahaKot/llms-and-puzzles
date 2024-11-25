@@ -14,14 +14,15 @@ if __name__ == "__main__":
 
     prompt = prompts_list.cryptic_crosswords_prompts[args.prompt_name]
 
-    dataset = get_dataset_with_prompts("boda/guardian_naive_random", args.prompt_name)
-    dataset_length = len(dataset)
-    dataloader = DataLoader(dataset, batch_size=args.batch_size)
+    # dataset = get_dataset_with_prompts("cryptic_crosswords", args.prompt_name)
+    # dataset_length = len(dataset)
+    # dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
     model = LLM(
         model="meta-llama/Llama-3.1-8B-Instruct",
-        # max_model_len=256,
-        dtype="float16"
+        max_model_len=4098,
+        dtype="float16",
+        gpu_memory_utilization=0.8
     )
     tokenizer = model.get_tokenizer()
 
