@@ -1,6 +1,7 @@
 from tqdm import tqdm
 from utils import get_dataset_with_prompts, exact_match
 
+import torch
 from torch.utils.data import DataLoader
 from args_parser import get_args
 from vllm import LLM, SamplingParams
@@ -9,6 +10,8 @@ from models_list import models_dict
 
 if __name__ == "__main__":
     args = get_args()
+
+    print("current cuda device index: ", torch.cuda.current_device())
 
     dataset = get_dataset_with_prompts(args.dataset, args.prompt_name)
     dataset_length = len(dataset)
