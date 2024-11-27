@@ -16,7 +16,7 @@ def add_args(parser: argparse.ArgumentParser):
         "--dataset", type=str, choices=["cryptic_crosswords", "rosetta_stone"]
     )
     parser.add_argument(
-        "--model", type=str, choices=["llama8b", "mixtral7x8b"]
+        "--model", type=str, choices=["llama8b", "mixtral7x8b", "falcon40b", "mistral7b", "qwen"]
     )
     parser.add_argument(
         "--prompt_name", type=str, default="base", choices=["base", "advanced"]
