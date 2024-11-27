@@ -15,7 +15,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--n_gpus", type=int, default=1)
     parser.add_argument(
         "--dataset", type=str, choices=["cryptic_crosswords", "rosetta_stone",
-                                        "logic"]
+                                        "logic_puzzles"]
     )
     parser.add_argument(
         "--model", type=str, choices=["llama8b", "mixtral7x8b", "falcon40b",
