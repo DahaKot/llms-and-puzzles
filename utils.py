@@ -22,6 +22,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     elif dataset == "logic_puzzles":
         problem = example["problem"]
         options = "\n".join(example["options"])
+        example["possible_answers_string"] = options
 
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
         example["prompt"] = prompt.format(problem=problem, options=options)
@@ -105,6 +106,7 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
         )
 
         final_dataset = mapped_dataset.rename_column("problem", "input")
+        final_dataset = final_dataset.remove_columns(["options"])
 
         return final_dataset
 
