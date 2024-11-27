@@ -12,22 +12,26 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         print("correct_answers: ", correct_answers)
         return any([a.lower() in prediction for a in correct_answers])
 
+
 def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
-    clue = example['input']
-
     if dataset == "cryptic_crosswords":
+        clue = example['input']
         prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
-    elif dataset == "logic_puzzles":
-        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
 
-    example["prompt"] = prompt.format(clue=clue)
+        example["prompt"] = prompt.format(clue=clue)
+    elif dataset == "logic_puzzles":
+        problem = example["problem"]
+        options = "\n".join(example["options"])
+
+        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
+        example["prompt"] = prompt.format(problem=problem, options=options)
+        example["target"] = str(example["answer"])
 
     return example
 
 
 def get_dataset_with_prompts(dataset_name, prompt_name="base"):
     if dataset_name == "cryptic_crosswords":
-        print("dataset is cryptic crosswords")
         dataset = load_dataset("boda/guardian_naive_random", split="test")
 
         mapped_dataset = dataset.map(
@@ -87,6 +91,22 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                     })
 
         return Dataset.from_list(samples)
+    
+    elif dataset_name == "logic_puzzles":
+        dataset = load_dataset(
+            'json', data_files='./data/puzzle_ben/PuzzleBen_testset.json',
+            split="train"
+        )
+
+        mapped_dataset = dataset.map(
+            generate_prompt,
+            fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
+            load_from_cache_file=True
+        )
+
+        final_dataset = mapped_dataset.rename_column("problem", "input")
+
+        return final_dataset
 
 
 # the code is taken from KV Aditya Srivatsa and Mukund Choudhary
