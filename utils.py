@@ -2,7 +2,7 @@ import prompts_list
 from datasets import load_dataset, Dataset
 import re
 import json
-import pandas as pd
+
 
 def exact_match(prediction, correct_answer, multiple_answers=False):
     if not multiple_answers:
@@ -24,6 +24,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
 
     return example
 
+
 def get_dataset_with_prompts(dataset_name, prompt_name="base"):
     if dataset_name == "cryptic_crosswords":
         print("dataset is cryptic crosswords")
@@ -34,9 +35,8 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
             fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
             load_from_cache_file=True
         )
-            
         return mapped_dataset
-    
+
     elif dataset_name == "rosetta_stone":
         dataset = json.load(open(
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
@@ -87,27 +87,39 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                     })
 
         return Dataset.from_list(samples)
-    
+
+
 # the code is taken from KV Aditya Srivatsa and Mukund Choudhary
 class PromptBuilder:
     def __init__(self, prompt_name):
-        self.task_prompt_template = prompts_list.rosetta_stone_prompts[prompt_name]
+        self.task_prompt_template = \
+            prompts_list.rosetta_stone_prompts[prompt_name]
 
-        self.data_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n<<TRG_LANG>>: \"<<TRG_TEXT>>\"\n"
-        self.question_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n<<TRG_LANG>>: \"\""
+        self.data_text_template = \
+            "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n<<TRG_LANG>>: \"<<TRG_TEXT>>\"\n"
+        self.question_text_template = \
+            "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n<<TRG_LANG>>: \"\""
 
         self.single_data_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n"
         self.single_question_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\""
 
     def build_prompt_message(self, data, qna_row, qna_whole, **kwargs):
-        task_prompt = self.build_task_prompt(data, qna_row, qna_whole, **kwargs)
+        task_prompt = self.build_task_prompt(
+            data, qna_row, qna_whole, **kwargs
+        )
         return task_prompt
 
     def build_task_prompt(self, data, qna_row, qna_whole=None, language=None):
         data_text = self.build_data_text(data)
         question_text = self.build_question_text(qna_row)
-        all_questions_text = '\n\n'.join([self.build_question_text(qna_r) for qna_r in qna_whole]) if qna_whole != None else ""
-        lang = [l for l in [data[0][1][0], data[0][2][0]] if l.lower().strip()!="english"][0] if language==None else language
+        all_questions_text = '\n\n'.join(
+            [self.build_question_text(qna_r) for qna_r in qna_whole]) \
+            if qna_whole is not None else ""
+        
+        lang = [lang_name for lang_name in [data[0][1][0], data[0][2][0]]
+                if lang_name.lower().strip() != "english"][0] \
+            if language is None else language
+        
         span_dict = {
             "<<LANG>>": lang,
             "<<DATA>>": data_text,
@@ -129,28 +141,37 @@ class PromptBuilder:
                 "<<TRG_TEXT>>": target_text,
             }
 
-            if target_lang=="<<BLANK>>" or target_text=="<<BLANK>>":
-                data_text += replace_spans(self.single_data_text_template, span_dict) + '\n'
+            if target_lang == "<<BLANK>>" or target_text == "<<BLANK>>":
+                data_text += replace_spans(
+                    self.single_data_text_template, span_dict
+                ) + '\n'
             else:
-                data_text += replace_spans(self.data_text_template, span_dict) + '\n'
+                data_text += replace_spans(
+                    self.data_text_template, span_dict
+                ) + '\n'
 
         return data_text.rstrip('\n')
 
     def build_question_text(self, qna):
         source_lang, source_text = qna[1][0], qna[1][1]
-        target_lang, target_text = qna[2][0], qna[2][1] 
+        target_lang = qna[2][0]
         span_dict = {
             "<<SRC_LANG>>": source_lang,
             "<<SRC_TEXT>>": source_text,
             "<<TRG_LANG>>": target_lang,
         }
         # make sure to include target_lang but NOT target_text
-        if target_lang=="<<BLANK>>":
-            question_text = replace_spans(self.single_question_text_template, span_dict)
+        if target_lang == "<<BLANK>>":
+            question_text = replace_spans(
+                self.single_question_text_template, span_dict
+            )
         else:
-            question_text = replace_spans(self.question_text_template, span_dict)
+            question_text = replace_spans(
+                self.question_text_template, span_dict
+            )
 
         return question_text
+
 
 def replace_spans(template, span_dict):
     text = template
@@ -158,9 +179,8 @@ def replace_spans(template, span_dict):
         text = text.replace(k,v)
     return text
 
+
 def normalize_unicode(s):
     for x in re.findall(r"\\u([\da-f]{4})", s):
         s = s.replace(f"\\u{x}", chr(int(x, 16)))
     return s
-
-

@@ -1,7 +1,3 @@
-from typing import Dict
-import prompts_list
-import torch
-from transformers import pipeline
 from tqdm import tqdm
 from utils import get_dataset_with_prompts, exact_match
 
@@ -28,8 +24,9 @@ if __name__ == "__main__":
     tokenizer = model.get_tokenizer()
 
     sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=512, stop_token_ids=\
-        [tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+        temperature=0.0, top_p=1, max_tokens=512,
+        stop_token_ids=[tokenizer.eos_token_id,
+                        tokenizer.convert_tokens_to_ids("<|eot_id|>")]
     )
 
     correct_count = 0
@@ -45,11 +42,14 @@ if __name__ == "__main__":
         )
         text_predictions = []
 
-        for prediction, correct_answer in zip(batch_predictions, batch_correct_answers):
+        for prediction, correct_answer in zip(
+                batch_predictions, batch_correct_answers):
+
             model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
-            if exact_match(model_prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone")):
+            if exact_match(model_prediction, correct_answer,
+                           multiple_answers=(args.dataset == "rosetta_stone")):
                 correct_count += 1
 
         inputs.extend(batch_inputs)
@@ -63,10 +63,10 @@ if __name__ == "__main__":
     log_file.write(json.dumps(vars(args), indent=4, sort_keys=True))
     log_file.write("\nAccuracy: " + str(accuracy) + "\n")
 
-    for input, correct_answer, prediction in zip(inputs, correct_answers, predictions):
+    for input, correct_answer, prediction in zip(
+            inputs, correct_answers, predictions):
         log_file.write(
             "Input: " + input + "\nPrediction: " + prediction \
             + "\nCorrect Answer: " + correct_answer \
             + "\nCounted?" + str(correct_answer.lower() + "\n" in prediction)
         )
-
