@@ -14,9 +14,9 @@ if __name__ == "__main__":
 
     prompt = prompts_list.cryptic_crosswords_prompts[args.prompt_name]
 
-    # dataset = get_dataset_with_prompts("cryptic_crosswords", args.prompt_name)
-    # dataset_length = len(dataset)
-    # dataloader = DataLoader(dataset, batch_size=args.batch_size)
+    dataset = get_dataset_with_prompts("cryptic_crosswords", args.prompt_name)
+    dataset_length = len(dataset)
+    dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
     model = LLM(
         model="meta-llama/Llama-3.1-8B-Instruct",

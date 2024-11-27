@@ -9,6 +9,7 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         return correct_answer.lower() in prediction
     else:
         correct_answers = json.loads(correct_answer)
+        print("correct_answers: ", correct_answers)
         return any([a.lower() in prediction for a in correct_answers])
 
 def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):

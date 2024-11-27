@@ -21,6 +21,8 @@ if __name__ == "__main__":
     model = LLM(
         model=models_dict[args.model],
         dtype="float16",
+        max_model_len=4098,
+        gpu_memory_utilization=0.8,
         tensor_parallel_size=args.n_gpus
     )
     tokenizer = model.get_tokenizer()
@@ -58,13 +60,13 @@ if __name__ == "__main__":
 
     log_file = open("./logs/" + args.run_name + ".txt", "w")
 
-    log_file.write(json.dumps(args, indent=4, sort_keys=True))
+    log_file.write(json.dumps(vars(args), indent=4, sort_keys=True))
     log_file.write("\nAccuracy: " + str(accuracy) + "\n")
 
     for input, correct_answer, prediction in zip(inputs, correct_answers, predictions):
         log_file.write(
             "Input: " + input + "\nPrediction: " + prediction \
             + "\nCorrect Answer: " + correct_answer \
-            + "\nCounted?" + str(correct_answer.lower() in prediction)
+            + "\nCounted?" + str(correct_answer.lower() + "\n" in prediction)
         )
 
