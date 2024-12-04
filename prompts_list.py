@@ -52,7 +52,8 @@ Given the above examples, please translate the following expression.
 logic_puzzles_prompts = {"base": '''{problem}
 Possible answers:
 {options}
-Please, outout the number of the correct answer only:
+Output the number of the correct answer and nothing else.
+answer:
 ''',
 "advanced": '''You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
 The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.

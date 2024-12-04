@@ -27,7 +27,7 @@ if __name__ == "__main__":
     tokenizer = model.get_tokenizer()
 
     sampling_params = SamplingParams(
-        temperature=0.0, top_p=1, max_tokens=512,
+        temperature=0.0, top_p=1, max_tokens=args.max_tokens,
         stop_token_ids=[tokenizer.eos_token_id,
                         tokenizer.convert_tokens_to_ids("<|eot_id|>")]
     )
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     for input, correct_answer, prediction in zip(
             inputs, correct_answers, predictions):
         log_file.write(
-            "Input: " + input + "\nPrediction: " + prediction \
+            "\nInput: " + input + "\nPrediction: " + prediction \
             + "\nCorrect Answer: " + correct_answer \
-            + "\nCounted?" + str(correct_answer.lower() + "\n" in prediction)
+            + "\nCounted?" + str(exact_match(model_prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone"))
         )
