@@ -63,33 +63,33 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                     "dataset": "ModeLing"
                 })
 
-        dataset = json.load(open(
-            "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
-        ))
+        #dataset = json.load(open(
+        #    "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
+        #))
 
-        for d in dataset:
-            data = d["data"]
-            qna = d["qna"]
-            for row in qna:
-                message = prompt_builder.build_prompt_message(
-                    data, qna_row=row, qna_whole=qna
-                )
+        #for d in dataset:
+        #    data = d["data"]
+        #    qna = d["qna"]
+        #    for row in qna:
+        #        message = prompt_builder.build_prompt_message(
+        #            data, qna_row=row, qna_whole=qna
+        #        )
 
-                target = row[2][1]
-                if type(target) is not list:
-                    samples.append({
-                        "prompt": message,
-                        "target": json.dumps([target]),
-                        "input": message,
-                        "dataset": "LingOly"
-                    })
-                else:
-                    samples.append({
-                        "prompt": message,
-                        "target": json.dumps(target),
-                        "input": message,
-                        "dataset": "LingOly"
-                    })
+         #       target = row[2][1]
+         #       if type(target) is not list:
+        #            samples.append({
+        #                "prompt": message,
+        #                "target": json.dumps([target]),
+        #                "input": message,
+        #                "dataset": "LingOly"
+        #            })
+        #        else:
+        #            samples.append({
+        #                "prompt": message,
+        #                "target": json.dumps(target),
+        #                "input": message,
+        #                "dataset": "LingOly"
+        #            })
 
         return Dataset.from_list(samples)
     
