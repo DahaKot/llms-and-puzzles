@@ -52,7 +52,7 @@ if __name__ == "__main__":
                            multiple_answers=(args.dataset == "rosetta_stone")):
                 correct_count += 1
 
-        inputs.extend(batch_inputs)
+        inputs.extend(batch_prompts)
         correct_answers.extend(batch_correct_answers)
         predictions.extend(text_predictions)
 
@@ -68,5 +68,5 @@ if __name__ == "__main__":
         log_file.write(
             "\nInput: " + input + "\nPrediction: " + prediction
             + "\nCorrect Answer: " + correct_answer
-            + "\nCounted?" + str(exact_match(model_prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone")))
+            + "\nCounted?" + str(exact_match(prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone")))
         )
