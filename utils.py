@@ -95,7 +95,7 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
     
     elif dataset_name == "logic_puzzles":
         dataset = load_dataset(
-            'json', data_files='./data/puzzle_ben/PuzzleBen_testset.json',
+            'json', data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json',
             split="train"
         )
 
