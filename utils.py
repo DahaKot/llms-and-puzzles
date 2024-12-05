@@ -2,6 +2,7 @@ import prompts_list
 from datasets import load_dataset, Dataset
 import re
 import json
+import itertools
 
 
 def exact_match(prediction, correct_answer, multiple_answers=False):
@@ -22,6 +23,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     elif dataset == "logic_puzzles":
         problem = example["problem"]
         options = "\n".join(example["options"])
+        
         example["possible_answers_string"] = options
 
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
@@ -63,33 +65,39 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                     "dataset": "ModeLing"
                 })
 
-        #dataset = json.load(open(
-        #    "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
-        #))
+        dataset = json.load(open(
+           "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
+        ))
 
-        #for d in dataset:
-        #    data = d["data"]
-        #    qna = d["qna"]
-        #    for row in qna:
-        #        message = prompt_builder.build_prompt_message(
-        #            data, qna_row=row, qna_whole=qna
-        #        )
+        for d in dataset:
+            data = d["data"]
+            qna = d["qna"]
+            for row in qna:
+                message = prompt_builder.build_prompt_message(
+                    data, qna_row=row, qna_whole=qna
+                )
 
-         #       target = row[2][1]
-         #       if type(target) is not list:
-        #            samples.append({
-        #                "prompt": message,
-        #                "target": json.dumps([target]),
-        #                "input": message,
-        #                "dataset": "LingOly"
-        #            })
-        #        else:
-        #            samples.append({
-        #                "prompt": message,
-        #                "target": json.dumps(target),
-        #                "input": message,
-        #                "dataset": "LingOly"
-        #            })
+                target = row[2][1]
+                if type(target) is not list:
+                    samples.append({
+                        "prompt": message,
+                        "target": json.dumps([target]),
+                        "input": message,
+                        "dataset": "LingOly"
+                    })
+                else:
+                    if type(target[0]) is list:
+                        one_list_target = []
+                        for sublist in target:
+                            one_list_target.extend(sublist)
+                        target = list(set(one_list_target))
+
+                    samples.append({
+                        "prompt": message,
+                        "target": json.dumps(target),
+                        "input": message,
+                        "dataset": "LingOly"
+                    })
 
         return Dataset.from_list(samples)
     
