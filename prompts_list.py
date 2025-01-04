@@ -1,94 +1,84 @@
-cryptic_crosswords_prompts = {"base": '''You are a cryptic crossword expert. You are given a clue for a cryptic crossword. Output only the answer. 
-clue:
+cryptic_crosswords_prompts = {"base": '''You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+Clue:
 {clue}
-answer:
+Answer:
 ''',
-"advanced": '''You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
-The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
-The wordplay gives some instructions on how to get to the answer in another (less literal) way.
-The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
-Extract the definiton and the wordplay in the clue, and use them to solve the clue. Finally, output the answer in this format:
-answer:
-<answer>,
-clue:
+"advanced": '''You are a cryptic crossword expert. You are given a cryptic crossword clue.
+A cryptic clue typically consists of a definition and a wordplay. The definition is a synonym of the answer and usually appears at the beginning or the end of the clue. The wordplay provides instructions for deriving the answer in a less literal way. The number(s) in parentheses at the end of the clue indicate the length of the answer.
+Extract the definition and the wordplay from the clue, then use them to solve it. Finally, provide the answer in the format "Answer: ...".
+Clue:
 {clue}
-answer:
 ''',
-"base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a clue for a cryptic crossword. Output only the answer.
-clue:
+"base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+Clue:
 {clue}
-answer:
+Answer:
 [/INST]''',
-"advanced_mixtral_instruct": '''[INST] You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
-The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
-The wordplay gives some instructions on how to get the answer in another (less literal) way.
-The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
-Extract the definition and the wordplay in the clue, and use them to solve the clue. Finally, output the answer in this format:
-answer:
-<answer>,
-clue:
+"advanced_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue.
+A cryptic clue typically consists of a definition and a wordplay. The definition is a synonym of the answer and usually appears at the beginning or the end of the clue. The wordplay provides instructions for deriving the answer in a less literal way. The number(s) in parentheses at the end of the clue indicate the length of the answer.
+Extract the definition and the wordplay from the clue, then use them to solve it. Finally, provide the answer in the format "Answer: ...".
+Clue:
 {clue}
-answer:
 [/INST]'''
 }
 
-rosetta_stone_prompts = {"base": '''Here are some expressions in <<LANG>> (a never-seen-before foreign language) and their translations in English:
-
+rosetta_stone_prompts = {"base": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+Parallel sentences:
 <<DATA>>
-
-Given the above examples, please translate the following expression.
-
+Sentence to translate:
+<<QUESTION>>
+Answer:
+''',
+"advanced": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
+Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
+Parallel sentences:
+<<DATA>>
+Sentence to translate:
 <<QUESTION>>
 ''',
-"advanced": '''This is a translation puzzle. Below are example phrases in <<LANG>> (a never-seen-before foreign language) as well as their English translations. Some test phrases follow them. Your task is to look closely at the example phrases and use only the information from them to translate the test phrases.
-
+"base_mixtral_instruct": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+Parallel sentences:
 <<DATA>>
-
-Given the above examples, please translate the following expression.
-
+Sentence to translate:
 <<QUESTION>>
-''',
-"base_mixtral_instruct": '''[INST] Here are some expressions in <<LANG>> (a never-seen-before foreign language) and their translations in English:
-
-<<DATA>>
-
-Given the above examples, please translate the following expression.
-
-<<QUESTION>>
+Answer:
 [/INST]
 ''',
-"advanced_mixtral_instruct": '''[INST] This is a translation puzzle. Below are example phrases in <<LANG>> (a never-seen-before foreign language) as well as their English translations. Some test phrases follow them. Your task is to look closely at the example phrases and use only the information from them to translate the test phrases.
-
+"advanced_mixtral_instruct": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
+Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
+Parallel sentences:
 <<DATA>>
-
-Given the above examples, please translate the following expression.
-
+Sentence to translate:
 <<QUESTION>>
 [/INST]
 '''}
 
-logic_puzzles_prompts = {"base": '''{problem}
+logic_puzzles_prompts = {"base": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the number of the correct option.
+Puzzle:
+{problem}
 Possible answers:
 {options}
-Output the number of the correct answer and nothing else.
-answer:
+Answer:
 ''',
-"advanced": '''You are a cryptic crossword expert. The cryptic clue consists of a definition and a wordplay.
-The definition is a synonym of the answer and usually comes at the beginning or the end of the clue.
-The wordplay gives some instructions on how to get to the answer in another (less literal) way.
-The number/s in the parentheses at the end of the clue indicates the number of letters in the answer.
-Extract the definiton and the wordplay in the clue, and use them to solve the clue. Finally, output the answer on this format:
-answer:
-<answer>,
-clue:
-{clue}
-answer:
-''',
-"base_mixtral_instruct": '''[INST] {problem}
+"advanced": '''You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
+Solve the puzzle. Finally, provide the number of the correct option in the format "Answer: ...".
+Puzzle:
+{problem}
 Possible answers:
 {options}
-Output the number of the correct answer and nothing else.
-answer:
-[/INST]
 ''',
+"base_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the number of the correct option.
+Puzzle:
+{problem}
+Possible answers:
+{options}
+Answer:
+[/INST]''',
+"advanced_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
+Solve the puzzle. Finally, provide the number of the correct option in the format "Answer: ...".
+Puzzle:
+{problem}
+Possible answers:
+{options}
+[/INST]'''
 }
