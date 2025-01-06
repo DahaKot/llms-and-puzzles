@@ -13,6 +13,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--run_name", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--n_gpus", type=int, default=1)
+    parser.add_argument("--max_tokens", type=int, default=256)
     parser.add_argument(
         "--dataset", type=str, choices=["cryptic_crosswords", "rosetta_stone",
                                         "logic_puzzles"]
