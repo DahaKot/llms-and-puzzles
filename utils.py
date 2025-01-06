@@ -14,6 +14,19 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         return any([a.lower() in prediction for a in correct_answers])
 
 
+def check_answer_against_correct(prediction, correct_answer, dataset):
+    if dataset == "cryptic_crosswords":
+        return correct_answer.lower() in prediction.lower()
+    elif dataset == "rosetta_stone":
+        correct_answers = json.loads(correct_answer)
+        return any([a.lower() in prediction.lower() for a in correct_answers])
+    elif dataset == "logic_puzzles":
+        answer_position = prediction.find("Answer: ")
+        answer = prediction[answer_position + 8]
+        print(answer)
+        return answer == correct_answer
+
+
 def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     if dataset == "cryptic_crosswords":
         clue = example['input']
