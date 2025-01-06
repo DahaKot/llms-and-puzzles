@@ -23,5 +23,5 @@ def add_args(parser: argparse.ArgumentParser):
                                       "mistral7b", "qwen"]
     )
     parser.add_argument(
-        "--prompt_name", type=str, default="base", choices=["base", "advanced"]
+        "--prompt_name", type=str, default="base", choices=["base", "advanced", "base_mixtral_instruct", "advanced_mixtral_instruct"]
     )
