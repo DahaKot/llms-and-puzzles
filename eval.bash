@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=logic_puzzles_mixtral_base_mixtral_instruct_batch16 # Job name
+#SBATCH --job-name=rosetta_stone # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -9,14 +9,39 @@
 #SBATCH --cpus-per-task=8          # Number of CPU cores
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
-#SBATCH --gres=gpu:4                # Number of GPUs (per node)
-#SBATCH --time=01:00:00             # Specify the time needed for your experiment
+#SBATCH --gres=gpu:1                # Number of GPUs (per node)
+#SBATCH --time=03:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
 nvidia-smi
 
-python inference.py --run_name="logic_puzzles_base_mixtral_instruct" \
-    --batch_size=16 --dataset="logic_puzzles" --model="mixtral7x8b" \
-    --prompt_name="base_mixtral_instruct" --n_gpus=4
+dataset_name="rosetta_stone"
+batch_size=8
+max_tokens=512
+
+echo "llama base"
+
+python inference.py --run_name="updated_prompt_rosetta_stone_llama_base_max_tokens_512" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="llama8b" \
+    --prompt_name="base" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "llama advanced"
+
+python inference.py --run_name="updated_prompt_rosetta_stone_llama_advanced_max_tokens_512" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="llama8b" \
+    --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "qwen base"
+
+python inference.py --run_name="updated_prompt_rosetta_stone_qwen_base_max_tokens_512" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
+    --prompt_name="base" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "qwen advanced"
+
+python inference.py --run_name="updated_prompt_rosetta_stone_qwen_advanced_max_tokens_512" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
+    --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens
+
 echo " ending " 
