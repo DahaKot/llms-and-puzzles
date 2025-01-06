@@ -23,9 +23,9 @@ if __name__ == "__main__":
     inputs, correct_answers, predictions = [], [], []
 
     for sample in tqdm(dataloader):
-        inpupt = sample["input"]
-        correct_answer = sample["target"]
-        prompt = sample["prompt"]
+        inpupt = sample["input"][0]
+        correct_answer = sample["target"][0]
+        prompt = sample["prompt"][0]
 
         response = client.chat.completions.create(
             model="deepseek-chat",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             stream=False,
             temperature=0.0
         )
-        prediction = response.choices[0].message.content
+        prediction = response.choices[0].message.content.lower()
 
         if exact_match(prediction, correct_answer,
                        multiple_answers=(args.dataset == "rosetta_stone")):
@@ -45,7 +45,10 @@ if __name__ == "__main__":
         correct_answers.append(correct_answer)
         predictions.append(prediction)
 
-    accuracy = correct_count / dataset_length
+        if len(inputs) > 100:
+            break
+
+    accuracy = correct_count / 100
 
     log_file = open("./logs/" + args.run_name + ".txt", "w")
 
