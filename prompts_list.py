@@ -22,33 +22,31 @@ Clue:
 [/INST]'''
 }
 
-rosetta_stone_prompts = {"base": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+rosetta_stone_prompts = {"base": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate.
 Parallel sentences:
 <<DATA>>
-Sentence to translate:
+Translate the sentence and provide only the answer.
 <<QUESTION>>
 Answer:
 ''',
 "advanced": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
-Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
 Parallel sentences:
 <<DATA>>
-Sentence to translate:
+Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
 <<QUESTION>>
 ''',
-"base_mixtral_instruct": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+"base_mixtral_instruct": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate.
 Parallel sentences:
 <<DATA>>
-Sentence to translate:
+Translate the sentence and provide only the answer.
 <<QUESTION>>
 Answer:
 [/INST]
 ''',
 "advanced_mixtral_instruct": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
-Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
 Parallel sentences:
 <<DATA>>
-Sentence to translate:
+Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
 <<QUESTION>>
 [/INST]
 '''}
