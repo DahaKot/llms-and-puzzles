@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from utils import get_dataset_with_prompts, exact_match
+from utils import get_dataset_with_prompts, check_answer_against_correct
 
 from torch.utils.data import DataLoader
 from args_parser import get_args
@@ -48,8 +48,8 @@ if __name__ == "__main__":
             model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
-            if exact_match(model_prediction, correct_answer,
-                           multiple_answers=(args.dataset == "rosetta_stone")):
+            if check_answer_against_correct(model_prediction, correct_answer,
+                                            dataset=args.dataset):
                 correct_count += 1
 
         inputs.extend(batch_prompts)
@@ -68,5 +68,5 @@ if __name__ == "__main__":
         log_file.write(
             "\nInput: " + input + "\nPrediction: " + prediction
             + "\nCorrect Answer: " + correct_answer
-            + "\nCounted?" + str(exact_match(prediction, correct_answer, multiple_answers=(args.dataset == "rosetta_stone")))
+            + "\nCounted?" + str(check_answer_against_correct(model_prediction, correct_answer, dataset=args.dataset))
         )
