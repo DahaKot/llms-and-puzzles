@@ -68,5 +68,5 @@ if __name__ == "__main__":
         log_file.write(
             "\nInput: " + input + "\nPrediction: " + prediction
             + "\nCorrect Answer: " + correct_answer
-            + "\nCounted?" + str(check_answer_against_correct(model_prediction, correct_answer, dataset=args.dataset))
+            + "\nCounted?" + str(check_answer_against_correct(prediction, correct_answer, dataset=args.dataset)) + "\n\n"
         )
