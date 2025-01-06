@@ -19,7 +19,7 @@ def add_args(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--model", type=str, choices=["llama8b", "mixtral7x8b", "falcon40b",
-                                      "mistral7b", "qwen"]
+                                      "mistral7b", "qwen", "deepseek"]
     )
     parser.add_argument(
         "--prompt_name", type=str, default="base", choices=["base", "advanced"]
