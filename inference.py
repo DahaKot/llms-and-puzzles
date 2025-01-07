@@ -46,6 +46,7 @@ if __name__ == "__main__":
         for prediction, correct_answer in zip(
                 batch_predictions, batch_correct_answers):
 
+            print("prediction: ", prediction)
             model_prediction = prediction.outputs[0].text.lower().strip()
             log_probs = prediction.outputs[0].logprobs
             text_predictions.append(model_prediction)
