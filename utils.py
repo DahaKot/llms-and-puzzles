@@ -21,11 +21,14 @@ def check_answer_against_correct(prediction, correct_answer, dataset, logprobs=N
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction.lower() for a in correct_answers])
     elif dataset == "logic_puzzles":
+        print(len(logprobs))
         print(logprobs)
-        print(logprobs.shape, logprobs)
         answer_position = prediction.find("Answer: ")
-        answer = prediction[answer_position + 8]
-        print(answer)
+        print("prediction: ", prediction, "\nanswer_postion: ", answer_position)
+        if answer_position < 0:
+            return False
+        answer = prediction[answer_position + 8: answer_position + 9]
+        print("Extracted answer: ", answer)
         return answer == correct_answer
 
 
@@ -55,7 +58,7 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
         mapped_dataset = dataset.map(
             generate_prompt,
             fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
-            load_from_cache_file=True
+            load_from_cache_file=False
         )
         return mapped_dataset
 

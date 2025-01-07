@@ -13,6 +13,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--run_name", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--n_gpus", type=int, default=1)
+    parser.add_argument("--max_tokens", type=int, default=256)
     parser.add_argument("--logprobs", type=int, default=1)
     parser.add_argument(
         "--dataset", type=str, choices=["cryptic_crosswords", "rosetta_stone",
@@ -23,5 +24,5 @@ def add_args(parser: argparse.ArgumentParser):
                                       "mistral7b", "qwen", "deepseek"]
     )
     parser.add_argument(
-        "--prompt_name", type=str, default="base", choices=["base", "advanced"]
+        "--prompt_name", type=str, default="base", choices=["base", "advanced", "base_mixtral_instruct", "advanced_mixtral_instruct"]
     )
