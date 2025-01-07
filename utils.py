@@ -14,7 +14,7 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         return any([a.lower() in prediction for a in correct_answers])
 
 
-def check_answer_against_correct(prediction, correct_answer, dataset, logprobs):
+def check_answer_against_correct(prediction, correct_answer, dataset, logprobs=None):
     if dataset == "cryptic_crosswords":
         return correct_answer.lower() in prediction.lower()
     elif dataset == "rosetta_stone":
