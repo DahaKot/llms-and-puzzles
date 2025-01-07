@@ -21,8 +21,8 @@ def check_answer_against_correct(prediction, correct_answer, dataset, logprobs):
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction.lower() for a in correct_answers])
     elif dataset == "logic_puzzles":
+        print(len(logprobs))
         print(logprobs)
-        print(logprobs.shape, logprobs)
         answer_position = prediction.find("Answer: ")
         print("prediction: ", prediction, "\nanswer_postion: ", answer_position)
         if answer_position < 0:
