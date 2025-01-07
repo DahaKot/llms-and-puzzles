@@ -26,7 +26,8 @@ if __name__ == "__main__":
     sampling_params = SamplingParams(
         temperature=0.0, top_p=1, max_tokens=args.max_tokens,
         stop_token_ids=[tokenizer.eos_token_id,
-                        tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+                        tokenizer.convert_tokens_to_ids("<|eot_id|>")],
+        logprobs=args.logprobs
     )
 
     correct_count = 0
@@ -46,10 +47,11 @@ if __name__ == "__main__":
                 batch_predictions, batch_correct_answers):
 
             model_prediction = prediction.outputs[0].text.lower().strip()
+            log_probs = prediction.outputs[0].logprobs
             text_predictions.append(model_prediction)
 
             if check_answer_against_correct(model_prediction, correct_answer,
-                                            dataset=args.dataset):
+                                            dataset=args.dataset, logprobs=log_probs):
                 correct_count += 1
 
         inputs.extend(batch_prompts)
