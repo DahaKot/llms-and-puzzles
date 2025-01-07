@@ -22,8 +22,11 @@ def check_answer_against_correct(prediction, correct_answer, dataset):
         return any([a.lower() in prediction.lower() for a in correct_answers])
     elif dataset == "logic_puzzles":
         answer_position = prediction.find("Answer: ")
-        answer = prediction[answer_position + 8]
-        print(answer)
+        print("prediction: ", prediction, "\nanswer_postion: ", answer_position)
+        if answer_position < 0:
+            return False
+        answer = prediction[answer_position + 8: answer_position + 9]
+        print("Extracted answer: ", answer)
         return answer == correct_answer
 
 
