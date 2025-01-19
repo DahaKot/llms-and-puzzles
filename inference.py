@@ -25,13 +25,13 @@ if __name__ == "__main__":
 
     sampling_params = SamplingParams(
         temperature=0.0, top_p=1, max_tokens=args.max_tokens,
-        stop_token_ids=[tokenizer.eos_token_id,
-                        tokenizer.convert_tokens_to_ids("<|eot_id|>")],
-        logprobs=args.logprobs
+        stop_token_ids=[
+            tokenizer.eos_token_id,
+            tokenizer.convert_tokens_to_ids("<|eot_id|>")],  # type: ignore
     )
 
     correct_count = 0
-    inputs, correct_answers, predictions = [], [], []
+    inputs, correct_answers, predictions, counted = [], [], [], []
 
     for batch in tqdm(dataloader):
         batch_inputs = batch["input"]
@@ -41,23 +41,28 @@ if __name__ == "__main__":
         batch_predictions = model.generate(
             batch_prompts, sampling_params, use_tqdm=False
         )
-        text_predictions = []
+
+        text_predictions, correct_counts = [], []
 
         for prediction, correct_answer in zip(
                 batch_predictions, batch_correct_answers):
 
-            print("prediction: ", prediction)
             model_prediction = prediction.outputs[0].text.lower().strip()
-            log_probs = prediction.outputs[0].logprobs
             text_predictions.append(model_prediction)
 
-            if check_answer_against_correct(model_prediction, correct_answer,
-                                            dataset=args.dataset, logprobs=log_probs):
+            is_prediction_correct = check_answer_against_correct(
+                model_prediction, correct_answer, dataset=args.dataset)
+
+            if is_prediction_correct:
                 correct_count += 1
+                correct_counts.append(True)
+            else:
+                correct_counts.append(False)
 
         inputs.extend(batch_prompts)
         correct_answers.extend(batch_correct_answers)
         predictions.extend(text_predictions)
+        counted.extend(correct_counts)
 
     accuracy = correct_count / dataset_length
 
@@ -66,10 +71,10 @@ if __name__ == "__main__":
     log_file.write(json.dumps(vars(args), indent=4, sort_keys=True))
     log_file.write("\nAccuracy: " + str(accuracy) + "\n")
 
-    for input, correct_answer, prediction in zip(
-            inputs, correct_answers, predictions):
+    for input, correct_answer, prediction, is_counted in zip(  # type: ignore
+            inputs, correct_answers, predictions, counted):
         log_file.write(
             "\nInput: " + input + "\nPrediction: " + prediction
             + "\nCorrect Answer: " + correct_answer
-            + "\nCounted?" + str(check_answer_against_correct(prediction, correct_answer, dataset=args.dataset)) + "\n\n"
-        )
+            + "\nCounted?" + str(is_counted)
+    )
