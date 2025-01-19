@@ -1,14 +1,7 @@
 import prompts_list
-<<<<<<< HEAD
-from datasets import load_dataset, Dataset
-import re
-import json
-import itertools
-=======
 from datasets import load_dataset, Dataset  # type: ignore
 import re
 import json
->>>>>>> ea0f414a8641a7e8dc46b8954f12a28339809738
 
 
 def exact_match(prediction, correct_answer, multiple_answers=False):
