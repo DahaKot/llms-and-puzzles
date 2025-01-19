@@ -1,8 +1,14 @@
 import prompts_list
+<<<<<<< HEAD
 from datasets import load_dataset, Dataset
 import re
 import json
 import itertools
+=======
+from datasets import load_dataset, Dataset  # type: ignore
+import re
+import json
+>>>>>>> ea0f414a8641a7e8dc46b8954f12a28339809738
 
 
 def exact_match(prediction, correct_answer, multiple_answers=False):
@@ -14,23 +20,22 @@ def exact_match(prediction, correct_answer, multiple_answers=False):
         return any([a.lower() in prediction for a in correct_answers])
 
 
-def check_answer_against_correct(prediction, correct_answer, dataset, logprobs):
+def check_answer_against_correct(
+        prediction, correct_answer, dataset, logprobs=None):
     if dataset == "cryptic_crosswords":
         return correct_answer.lower() in prediction.lower()
     elif dataset == "rosetta_stone":
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction.lower() for a in correct_answers])
     elif dataset == "logic_puzzles":
-        print(len(logprobs))
-        print(logprobs)
-        answer_position = prediction.find("Answer: ")
-        print("prediction: ", prediction, "\nanswer_postion: ", answer_position)
-        if answer_position < 0:
-            return False
-        answer = prediction[answer_position + 8: answer_position + 9]
-        print("Extracted answer: ", answer)
+        # here it's complicated, not sure, if it is the best way to compare
+        answer = prediction.split()[0]
         return answer == correct_answer
-
+        # answer_position = prediction.find("Answer: ")
+        # if answer_position < 0:
+        #     return False
+        # answer = prediction[answer_position + 8: answer_position + 9]
+        # return answer == correct_answer
 
 def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     if dataset == "cryptic_crosswords":
@@ -41,7 +46,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     elif dataset == "logic_puzzles":
         problem = example["problem"]
         options = "\n".join(example["options"])
-        
+
         example["possible_answers_string"] = options
 
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
@@ -118,11 +123,11 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
                     })
 
         return Dataset.from_list(samples)
-    
+
     elif dataset_name == "logic_puzzles":
         dataset = load_dataset(
-            'json', data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json',
-            split="train"
+            'json', split="train",
+            data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
         )
 
         mapped_dataset = dataset.map(
@@ -163,11 +168,11 @@ class PromptBuilder:
         all_questions_text = '\n\n'.join(
             [self.build_question_text(qna_r) for qna_r in qna_whole]) \
             if qna_whole is not None else ""
-        
+
         lang = [lang_name for lang_name in [data[0][1][0], data[0][2][0]]
                 if lang_name.lower().strip() != "english"][0] \
             if language is None else language
-        
+
         span_dict = {
             "<<LANG>>": lang,
             "<<DATA>>": data_text,
@@ -224,7 +229,7 @@ class PromptBuilder:
 def replace_spans(template, span_dict):
     text = template
     for k, v in span_dict.items():
-        text = text.replace(k,v)
+        text = text.replace(k, v)
     return text
 
 
