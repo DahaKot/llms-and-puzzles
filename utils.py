@@ -126,7 +126,7 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
         mapped_dataset = dataset.map(
             generate_prompt,
             fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
-            load_from_cache_file=True
+            load_from_cache_file=False
         )
 
         final_dataset = mapped_dataset.rename_column("problem", "input")
