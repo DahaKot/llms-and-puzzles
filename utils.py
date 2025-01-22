@@ -38,13 +38,19 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
         example["prompt"] = prompt.format(clue=clue)
     elif dataset == "logic_puzzles":
         problem = example["problem"]
-        options = "\n".join(example["options"])
+
+        number_options = ["Option1", "Option2", "Option3", "Option4", "Option5"]
+        letter_options = ["A", "B", "C", "D", "E"]
+        options = []
+        for i, option in enumerate(example["options"]):
+            option = option.replace(number_options[i], letter_options[i])
+        options = "\n".join(options)
 
         example["possible_answers_string"] = options
 
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
         example["prompt"] = prompt.format(problem=problem, options=options)
-        example["target"] = str(example["answer"])
+        example["target"] = letter_options[example["answer"] - 1]
 
     return example
 
