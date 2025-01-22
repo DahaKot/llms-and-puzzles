@@ -81,14 +81,14 @@ Analyze how the language works and apply the deduced rules to translate the new 
 [/INST]
 '''}
 
-logic_puzzles_prompts = {"base": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the number of the correct option in the format: "answer: <option number>".
+logic_puzzles_prompts = {"base": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
 {problem}
 Possible answers:
 {options}
 Answer:
 ''',
-"zero_shot_chain_of_thought": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide the number of the correct option in the format: "answer: <option number>".
+"zero_shot_chain_of_thought": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
 {problem}
 Possible answers:
@@ -97,7 +97,7 @@ Answer:
 Let's think step by step.
 ''',
 "advanced": '''You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
-Solve the puzzle. Finally, provide the number of the correct option in the format: "answer: <option number>".
+Solve the puzzle. Finally, provide the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
 {problem}
 Possible answers:
