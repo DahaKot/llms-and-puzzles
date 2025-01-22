@@ -22,13 +22,14 @@ def check_answer_against_correct(
         return any([a.lower() in prediction.lower() for a in correct_answers])
     elif dataset == "logic_puzzles":
         # here it's complicated, not sure, if it is the best way to compare
-        answer = prediction.split()[0]
-        return answer == correct_answer
-        # answer_position = prediction.find("Answer: ")
-        # if answer_position < 0:
-        #     return False
-        # answer = prediction[answer_position + 8: answer_position + 9]
-        # return answer == correct_answer
+        prediction = prediction.replace("[", "").lower()
+        answer_position = prediction.find("answer: ")
+        if answer_position < 0:
+            return False
+        answer = prediction[answer_position + 8: answer_position + 9]
+        print("Extracted answer: ", answer)
+        print("Original answer: ", prediction)
+        return answer.lower() == correct_answer.lower()
 
 def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     if dataset == "cryptic_crosswords":
@@ -44,6 +45,7 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
         options = []
         for i, option in enumerate(example["options"]):
             option = option.replace(number_options[i], letter_options[i])
+            options.append(option)
         options = "\n".join(options)
 
         example["possible_answers_string"] = options

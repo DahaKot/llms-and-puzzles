@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=logic_puzzles_qwen_advanced # Job name
+#SBATCH --job-name=logic_puzzles_llama_base # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -10,38 +10,44 @@
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
 #SBATCH --gres=gpu:1                # Number of GPUs (per node)
-#SBATCH --time=00:40:00             # Specify the time needed for your experiment
+#SBATCH --time=02:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
 nvidia-smi
 
 dataset_name="logic_puzzles"
-batch_size=16
+batch_size=64
 max_tokens=256
 
-echo "logic puzzles base llama8b"
+echo "logic puzzles advanced llama8b"
 
-python inference.py --run_name="logic_puzzles_qwen_advanced_answer_format" \
+python inference.py --run_name="logic_puzzles_llama_advanced" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="llama8b" \
+    --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "logic puzzles cot llama"
+
+python inference.py --run_name="logic_puzzles_llama_zero_shot_chain_of_thought" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="llama8b" \
+    --prompt_name="zero_shot_chain_of_thought" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "logic puzzles base qwen"
+
+python inference.py --run_name="logic_puzzles_qwen_base" \
+    --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
+    --prompt_name="base" --n_gpus=1 --max_tokens=$max_tokens
+
+echo "logic puzzles advanced qwen"
+
+python inference.py --run_name="logic_puzzles_qwen_advanced" \
     --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
     --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens
 
-echo "cryptic crosswords mixtral cot"
+echo "logic puzzles cot qwen"
 
-#python inference.py --run_name="cryptic_crosswords_mixtral_zero_shot_chain_of_thought" \
-#    --batch_size=256 --dataset="cryptic_crosswords" --model="mixtral7x8b" \
-#    --prompt_name="zero_shot_chain_of_thought_mixtral_instruct" --n_gpus=4 --max_tokens=256
-
-echo "qwen base"
-
-#python inference.py --run_name="updated_prompt_rosetta_stone_qwen_base_max_tokens_512_inter_prompt" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
-#    --prompt_name="base" --n_gpus=1 --max_tokens=$max_tokens
-
-echo "qwen advanced"
-
-#python inference.py --run_name="updated_prompt_rosetta_stone_qwen_advanced_max_tokens_512_inter_prompt" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
-#    --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens
+python inference.py --run_name="logic_puzzles_qwen_zero_shot_chain_of_thought" \
+	--batch_size=$batch_size --dataset=$dataset_name --model="qwen" \
+	--prompt_name="zero_shot_chain_of_thought" --n_gpus=1 --max_tokens=$max_tokens
 
 echo " ending " 
