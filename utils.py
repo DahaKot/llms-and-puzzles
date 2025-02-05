@@ -2,6 +2,10 @@ import prompts_list
 from datasets import load_dataset, Dataset  # type: ignore
 import re
 import json
+import random
+
+
+N_SHOTS = 5
 
 
 def exact_match(prediction, correct_answer, multiple_answers=False):
@@ -27,16 +31,47 @@ def check_answer_against_correct(
         if answer_position < 0:
             return False
         answer = prediction[answer_position + 8: answer_position + 9]
-        print("Extracted answer: ", answer)
-        print("Original answer: ", prediction)
         return answer.lower() == correct_answer.lower()
 
-def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
+
+def random_similarity(example, dataset):
+    random_indices = random.sample(range(len(dataset)), N_SHOTS)
+
+    examples = [dataset[i] for i in random_indices]
+
+    clues_answers = {}
+
+    for i, example in enumerate(examples):
+        clues_answers["clue" + str(i + 1)] = example["input"]
+        clues_answers["answer" + str(i + 1)] = example["target"]
+
+    return clues_answers
+
+
+def semantic_similarity(example, dataset):
+    random_indices = random.sample(range(len(dataset)), N_SHOTS)
+
+    return [dataset[i] for i in random_indices]
+
+
+def thematic_similarity(example, dataset):
+    random_indices = random.sample(range(len(dataset)), N_SHOTS)
+
+    return [dataset[i] for i in random_indices]
+
+
+def generate_prompt(
+        example, dataset="cryptic_crosswords", prompt_name="base",
+        similarity=random_similarity, full_dataset=None):
     if dataset == "cryptic_crosswords":
         clue = example['input']
         prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
 
-        example["prompt"] = prompt.format(clue=clue)
+        if full_dataset:
+            few_shot_examples = similarity(example, full_dataset)
+            example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
+        else:
+            example["prompt"] = prompt.format(clue=clue)
     elif dataset == "logic_puzzles":
         problem = example["problem"]
 
@@ -57,13 +92,23 @@ def generate_prompt(example, dataset="cryptic_crosswords", prompt_name="base"):
     return example
 
 
-def get_dataset_with_prompts(dataset_name, prompt_name="base"):
+def get_dataset_with_prompts(dataset_name, prompt_name="base", similarity="random"):
+    similarity_functions = {
+        "random": random_similarity, "semantic": semantic_similarity,
+        "thematic": thematic_similarity
+    }
+    include_full_dataset = prompt_name.startswith("5_shot")
+
     if dataset_name == "cryptic_crosswords":
         dataset = load_dataset("boda/guardian_naive_random", split="test")
 
         mapped_dataset = dataset.map(
             generate_prompt,
-            fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
+            fn_kwargs={
+                "prompt_name": prompt_name, "dataset": dataset_name,
+                "similarity": similarity_functions[similarity],
+                "full_dataset": dataset if include_full_dataset else None,
+            },
             load_from_cache_file=False
         )
         return mapped_dataset
@@ -133,7 +178,11 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base"):
 
         mapped_dataset = dataset.map(
             generate_prompt,
-            fn_kwargs={"prompt_name": prompt_name, "dataset": dataset_name},
+            fn_kwargs={
+                "prompt_name": prompt_name, "dataset": dataset_name,
+                "similarity": similarity_functions[similarity],
+                "full_dataset": dataset if include_full_dataset else None,
+            },
             load_from_cache_file=False
         )
 
