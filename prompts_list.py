@@ -100,133 +100,143 @@ Answer:
 
 rosetta_stone_prompts = {"base": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Parallel sentences:
-<<DATA>>
+{data}
+
 Sentence to translate:
-<<QUESTION>>
+{question}
 Answer:
 ''',
 "zero_shot_chain_of_thought": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence.
 Parallel sentences:
-<<DATA>>
+{data}
+
 Sentence to translate:
-<<QUESTION>>
+{question}
 Answer:
 Let's think step by step.
 ''',
 "advanced": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
-Parallel sentences:
-<<DATA>>
 Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
-<<QUESTION>>
+Parallel sentences:
+{data}
+
+Sentence to translate:
+{question}
 ''',
 "5_shot": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Examples:
 Parallel sentences:
-<<DATA1>>
+{data1}
 Sentence to translate:
-<<QUESTION1>>
+{question1}
 Answer:
-<<ANSWER1>>
+{answer1}
 
 Parallel sentences:
-<<DATA2>>
+{data2}
 Sentence to translate:
-<<QUESTION2>>
+{question2}
 Answer:
-<<ANSWER2>>
+{answer2}
 
 Parallel sentences:
-<<DATA3>>
+{data3}
 Sentence to translate:
-<<QUESTION3>>
+{question3}
 Answer:
-<<ANSWER3>>
+{answer3}
 
 Parallel sentences:
-<<DATA4>>
+{data4}
 Sentence to translate:
-<<QUESTION4>>
+{question4}
 Answer:
-<<ANSWER4>>
+{answer4}
 
 Parallel sentences:
-<<DATA5>>
+{data5}
 Sentence to translate:
-<<QUESTION5>>
+{question5}
 Answer:
-<<ANSWER5>>
+{answer5}
 
 Parallel sentences:
-<<DATA>>
+{data}
+
 Sentence to translate:
-<<QUESTION>>
+{question}
 Answer:
 ''',
 "base_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate.
 Parallel sentences:
-<<DATA>>
+{data}
+
 Translate the sentence and provide only the answer.
-<<QUESTION>>
+{question}
 Answer:
 [/INST]
 ''',
 "zero_shot_chain_of_thought_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence.
 Parallel sentences:
-<<DATA>>
+{data}
+
 Sentence to translate:
-<<QUESTION>>
+{question}
 Answer:
 Let's think step by step.
 [/INST]
 ''',
 "advanced_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
-Parallel sentences:
-<<DATA>>
 Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
-<<QUESTION>>
+Parallel sentences:
+{data}
+
+Sentence to translate:
+{question}
 [/INST]
 ''',
 "5_shot_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Examples:
 Parallel sentences:
-<<DATA1>>
+{data1}
 Sentence to translate:
-<<QUESTION1>>
+{question1}
 Answer:
-<<ANSWER1>>
+{answer1}
 
 Parallel sentences:
-<<DATA2>>
+{data2}
 Sentence to translate:
-<<QUESTION2>>
+{question2}
 Answer:
-<<ANSWER2>>
+{answer2}
 
 Parallel sentences:
-<<DATA3>>
+{data3}
 Sentence to translate:
-<<QUESTION3>>
+{question3}
 Answer:
-<<ANSWER3>>
+{answer3}
 
 Parallel sentences:
-<<DATA4>>
+{data4}
 Sentence to translate:
-<<QUESTION4>>
+{question4}
 Answer:
-<<ANSWER4>>
+{answer4}
 
 Parallel sentences:
-<<DATA5>>
+{data5}
 Sentence to translate:
-<<QUESTION5>>
+{question5}
 Answer:
-<<ANSWER5>>
+{answer5}
 
 Parallel sentences:
-<<DATA>>
+{data}
+
 Sentence to translate:
-<<QUESTION>>
+{question}
 Answer:
 [/INST]
 ''',
