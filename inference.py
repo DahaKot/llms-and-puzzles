@@ -1,5 +1,6 @@
 from tqdm import tqdm
-from utils import get_dataset_with_prompts, check_answer_against_correct
+# from utils import , check_answer_against_correct
+from dataset_preparation import get_dataset_with_prompts
 
 from torch.utils.data import DataLoader
 from args_parser import get_args
@@ -10,7 +11,11 @@ from models_list import models_dict
 if __name__ == "__main__":
     args = get_args()
 
-    dataset = get_dataset_with_prompts(args.dataset, args.prompt_name)
+    wrapped = get_dataset_with_prompts(
+        args.dataset, args.prompt_name, similarity=args.similarity,
+        order=args.order
+    )
+    dataset = wrapped.mapped_dataset
     dataset_length = len(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size)
 
@@ -50,8 +55,9 @@ if __name__ == "__main__":
             model_prediction = prediction.outputs[0].text.lower().strip()
             text_predictions.append(model_prediction)
 
-            is_prediction_correct = check_answer_against_correct(
-                model_prediction, correct_answer, dataset=args.dataset)
+            is_prediction_correct = wrapped.check_answer_against_correct(
+                model_prediction, correct_answer
+            )
 
             if is_prediction_correct:
                 correct_count += 1

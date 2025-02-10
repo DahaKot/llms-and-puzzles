@@ -25,6 +25,16 @@ def add_args(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--prompt_name", type=str, default="base",
-        choices=["base", "advanced", "5_shot", "base_mixtral_instruct",
-                 "advanced_mixtral_instruct", "zero_shot_chain_of_thought", "zero_shot_chain_of_thought_mixtral_instruct"]
+        choices=["base", "advanced", "zero_shot_chain_of_thought", "5_shot",
+                 "base_mixtral_instruct", "advanced_mixtral_instruct",
+                 "zero_shot_chain_of_thought_mixtral_instruct",
+                 "5_shot_mixtral_isntruct"]
+    )
+    parser.add_argument(
+        "--similarity", type=str, default="random",
+        choices=["random", "semantic", "thematic"]
+    )
+    parser.add_argument(
+        "--order", type=str, default="random",
+        choices=["random", "most_similar", "least_similar", "other_categories"]
     )

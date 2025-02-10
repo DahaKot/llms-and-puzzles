@@ -35,6 +35,7 @@ def check_answer_against_correct(
 
 
 def random_similarity(example, dataset):
+    random.seed(42)
     random_indices = random.sample(range(len(dataset)), N_SHOTS)
 
     examples = [dataset[i] for i in random_indices]
@@ -92,7 +93,8 @@ def generate_prompt(
     return example
 
 
-def get_dataset_with_prompts(dataset_name, prompt_name="base", similarity="random"):
+def get_dataset_with_prompts(
+        dataset_name, prompt_name="base", similarity="random", order="random"):
     similarity_functions = {
         "random": random_similarity, "semantic": semantic_similarity,
         "thematic": thematic_similarity
