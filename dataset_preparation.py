@@ -1,8 +1,8 @@
 import prompts_list
 from datasets import load_dataset, Dataset  # type: ignore
-import re
 import json
 import random
+from utils import replace_spans
 
 
 class MyDataset():
@@ -72,13 +72,13 @@ class CrypticCrosswords(MyDataset):
 
         examples = [self.dataset[i] for i in random_indices]
 
-        clues_and_answers = {}
+        data = {}
 
         for i, example in enumerate(examples):
-            clues_and_answers["clue" + str(i + 1)] = example["input"]
-            clues_and_answers["answer" + str(i + 1)] = example["target"]
+            data["clue" + str(i + 1)] = example["input"]
+            data["answer" + str(i + 1)] = example["target"]
 
-        return clues_and_answers
+        return data
 
     def semantic_similarity(self, example):
         pass
@@ -90,34 +90,226 @@ class CrypticCrosswords(MyDataset):
         return correct_answer.lower() in prediction.lower()
 
 
-def get_dataset_with_prompts(dataset_name, prompt_name="base",
-                             similarity="random", order="random", n_shots=0):
-    if dataset_name == "cryptic_crosswords":
-        wrapped_dataset = CrypticCrosswords(prompt_name, similarity, n_shots)
+class RosettaStone(MyDataset):
+    def __init__(self, prompt_name, similarity, n_shots=0):
+        super().__init__(
+            "rosetta_stone", prompt_name, similarity, n_shots
+        )
 
-    return wrapped_dataset
+        self.modeling_raw = json.load(open(
+            "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
+        ))
+        self.lingoly_raw = json.load(open(
+            "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
+        ))
 
-N_SHOTS = 5
+        modeling_data = self._load_modeling_data()
+        lingoly_data = self._load_lingoly_data()
+        combined_samples = modeling_data + lingoly_data
 
+        self.dataset = Dataset.from_list(combined_samples)
 
-def exact_match(prediction, correct_answer, multiple_answers=False):
-    if not multiple_answers:
-        return correct_answer.lower() in prediction
-    else:
-        correct_answers = json.loads(correct_answer)
-        print("correct_answers: ", correct_answers)
-        return any([a.lower() in prediction for a in correct_answers])
+        self.mapped_dataset = self.dataset.map(
+            self.generate_prompt,
+            fn_kwargs={"prompt_name": prompt_name},
+            load_from_cache_file=False
+        )
 
+    def _load_modeling_data(self):
+        dataset = json.load(open(
+            "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
+        ))
 
-def check_answer_against_correct(
-        prediction, correct_answer, dataset, logprobs=None):
-    if dataset == "cryptic_crosswords":
-        return correct_answer.lower() in prediction.lower()
-    elif dataset == "rosetta_stone":
+        prompt_builder = PromptBuilder(self.prompt_name)
+        samples = []
+
+        for d in dataset:
+            data = d["cleaned_data"]["data"]
+            qna = d["cleaned_data"]["qna"]
+            for row in qna:
+                train_data, question = prompt_builder.get_data_and_question(
+                    data, qna_row=row
+                )
+                samples.append({
+                    "data": train_data,
+                    "question": question,
+                    "target": json.dumps([row[2][1]]),
+                    "input": train_data + "\n\n" + question,
+                    "dataset": "ModeLing"
+                })
+
+        return samples
+
+    def _load_lingoly_data(self):
+        dataset = json.load(open(
+            "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
+        ))
+
+        prompt_builder = PromptBuilder(self.prompt_name)
+        samples = []
+
+        for d in dataset:
+            data = d["data"]
+            qna = d["qna"]
+            for row in qna:
+                train_data, question = prompt_builder.get_data_and_question(
+                    data, qna_row=row
+                )
+
+                target = row[2][1]
+                if not isinstance(target, list):
+                    target_list = json.dumps([target])
+                else:
+                    if isinstance(target[0], list):
+                        # Flatten nested lists and remove duplicates
+                        one_list_target = []
+                        for sublist in target:
+                            one_list_target.extend(sublist)
+                        target = list(set(one_list_target))
+                    target_list = json.dumps(target)
+
+                samples.append({
+                    "data": train_data,
+                    "question": question,
+                    "target": target_list,
+                    "input": train_data + "\n\n" + question,
+                    "dataset": "LingOly"
+                })
+
+        return samples
+
+    def generate_prompt(self, example, prompt_name):
+        data = example['data']
+        question = example['question']
+        prompt = prompts_list.rosetta_stone_prompts[prompt_name]
+
+        if self.n_shots:
+            few_shot_examples = self.similarity(example)
+            example["prompt"] = prompt.format(
+                data=data, question=question, **few_shot_examples
+            )
+        else:
+            example["prompt"] = prompt.format(data=data, question=question)
+
+        return example
+
+    def random_similarity(self, example):
+        # here we need to filter the same languages
+        random.seed(42)
+        random_indices = random.sample(range(len(self.dataset)), self.n_shots)
+
+        examples = [self.dataset[i] for i in random_indices]
+
+        data = {}
+
+        for i, example in enumerate(examples):
+            data["data" + str(i + 1)] = example["data"]
+            data["question" + str(i + 1)] = example["question"]
+
+            one_correct_answer = json.loads(example["target"])[0]
+            data["answer" + str(i + 1)] = one_correct_answer
+
+        return data
+
+    def semantic_similarity(self, example):
+        pass
+
+    def thematic_similarity(self, example):
+        pass
+
+    def check_answer_against_correct(self, prediction, correct_answer):
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction.lower() for a in correct_answers])
-    elif dataset == "logic_puzzles":
-        # here it's complicated, not sure, if it is the best way to compare
+
+
+class LogicPuzzles(MyDataset):
+    def __init__(self, prompt_name, similarity, n_shots=0):
+        super().__init__(
+            "logic_puzzles", prompt_name, similarity, n_shots
+        )
+
+        self.dataset = load_dataset(
+            'json', split="train",
+            data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
+        )
+
+        self.mapped_dataset = self.dataset.map(
+            self.generate_prompt,
+            fn_kwargs={
+                "prompt_name": prompt_name
+            },
+            load_from_cache_file=False
+        )
+
+        self.mapped_dataset = self.mapped_dataset.rename_column(
+            "problem", "input"
+        )
+        self.mapped_dataset = self.mapped_dataset.remove_columns(["options"])
+
+    def _generate_options_string(self, example):
+        number_options = [
+            "Option1", "Option2", "Option3", "Option4", "Option5"
+        ]
+        letter_options = ["A", "B", "C", "D", "E"]
+
+        options = []
+        for i, option in enumerate(example["options"]):
+            option = option.replace(number_options[i], letter_options[i])
+            options.append(option)
+        options = "\n".join(options)
+
+        return options
+
+    def generate_prompt(self, example, prompt_name):
+        problem = example["problem"]
+        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
+
+        example["possible_answers_string"] = self._generate_options_string(
+            example
+        )
+
+        if self.n_shots:
+            few_shot_examples = self.similarity(example)
+            example["prompt"] = prompt.format(
+                problem=problem,
+                options=example["possible_answers_string"], **few_shot_examples
+            )
+        else:
+            example["prompt"] = prompt.format(
+                problem=problem, options=example["possible_answers_string"]
+            )
+
+        letter_options = ["A", "B", "C", "D", "E"]
+        example["target"] = letter_options[example["answer"] - 1]
+
+        return example
+
+    def random_similarity(self, example):
+        letter_options = ["A", "B", "C", "D", "E"]
+
+        random.seed(42)
+        random_indices = random.sample(range(len(self.dataset)), self.n_shots)
+
+        examples = [self.dataset[i] for i in random_indices]
+
+        data = {}
+
+        for i, example in enumerate(examples):
+            data["problem" + str(i + 1)] = example["problem"]
+            data["answer" + str(i + 1)] = letter_options[example["answer"] - 1]
+            data["options" + str(i + 1)] = self._generate_options_string(
+                example
+            )
+
+        return data
+
+    def semantic_similarity(self, example):
+        pass
+
+    def thematic_similarity(self, example):
+        pass
+
+    def check_answer_against_correct(self, prediction, correct_answer):
         prediction = prediction.replace("[", "").lower()
         answer_position = prediction.find("answer: ")
         if answer_position < 0:
@@ -126,164 +318,16 @@ def check_answer_against_correct(
         return answer.lower() == correct_answer.lower()
 
 
-def random_similarity(example, dataset):
-    random.seed(42)
-    random_indices = random.sample(range(len(dataset)), N_SHOTS)
+def get_dataset_with_prompts(dataset_name, prompt_name="base",
+                             similarity="random", order="random", n_shots=0):
+    datasets = {
+        "cryptic_crosswords": CrypticCrosswords, "rosetta_stone": RosettaStone,
+        "logic_puzzles": LogicPuzzles
+    }
 
-    examples = [dataset[i] for i in random_indices]
+    wrapped_dataset = datasets[dataset_name](prompt_name, similarity, n_shots)
 
-    clues_answers = {}
-
-    for i, example in enumerate(examples):
-        clues_answers["clue" + str(i + 1)] = example["input"]
-        clues_answers["answer" + str(i + 1)] = example["target"]
-
-    return clues_answers
-
-
-def semantic_similarity(example, dataset):
-    random_indices = random.sample(range(len(dataset)), N_SHOTS)
-
-    return [dataset[i] for i in random_indices]
-
-
-def thematic_similarity(example, dataset):
-    random_indices = random.sample(range(len(dataset)), N_SHOTS)
-
-    return [dataset[i] for i in random_indices]
-
-
-def generate_prompt(
-        example, dataset="cryptic_crosswords", prompt_name="base",
-        similarity=random_similarity, full_dataset=None):
-    if dataset == "cryptic_crosswords":
-        clue = example['input']
-        prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
-
-        if full_dataset:
-            few_shot_examples = similarity(example, full_dataset)
-            example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
-        else:
-            example["prompt"] = prompt.format(clue=clue)
-    elif dataset == "logic_puzzles":
-        problem = example["problem"]
-
-        number_options = ["Option1", "Option2", "Option3", "Option4", "Option5"]
-        letter_options = ["A", "B", "C", "D", "E"]
-        options = []
-        for i, option in enumerate(example["options"]):
-            option = option.replace(number_options[i], letter_options[i])
-            options.append(option)
-        options = "\n".join(options)
-
-        example["possible_answers_string"] = options
-
-        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
-        example["prompt"] = prompt.format(problem=problem, options=options)
-        example["target"] = letter_options[example["answer"] - 1]
-
-    return example
-
-
-# def get_dataset_with_prompts(
-#         dataset_name, prompt_name="base", similarity="random", order="random"):
-#     similarity_functions = {
-#         "random": random_similarity, "semantic": semantic_similarity,
-#         "thematic": thematic_similarity
-#     }
-#     include_full_dataset = prompt_name.startswith("5_shot")
-
-#     if dataset_name == "cryptic_crosswords":
-#         dataset = load_dataset("boda/guardian_naive_random", split="test")
-
-#         mapped_dataset = dataset.map(
-#             generate_prompt,
-#             fn_kwargs={
-#                 "prompt_name": prompt_name, "dataset": dataset_name,
-#                 "similarity": similarity_functions[similarity],
-#                 "full_dataset": dataset if include_full_dataset else None,
-#             },
-#             load_from_cache_file=False
-#         )
-#         return mapped_dataset
-
-#     elif dataset_name == "rosetta_stone":
-#         dataset = json.load(open(
-#             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
-#         ))
-#         prompt_builder = PromptBuilder(prompt_name)
-
-#         samples = []
-#         for d in dataset:
-#             data = d["cleaned_data"]["data"]
-#             qna = d["cleaned_data"]["qna"]
-#             for row in qna:
-#                 message = prompt_builder.build_prompt_message(
-#                     data, qna_row=row, qna_whole=qna
-#                 )
-#                 samples.append({
-#                     "prompt": message,
-#                     "target": json.dumps([row[2][1]]),
-#                     "input": message,
-#                     "dataset": "ModeLing"
-#                 })
-
-#         dataset = json.load(open(
-#            "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
-#         ))
-
-#         for d in dataset:
-#             data = d["data"]
-#             qna = d["qna"]
-#             for row in qna:
-#                 message = prompt_builder.build_prompt_message(
-#                     data, qna_row=row, qna_whole=qna
-#                 )
-
-#                 target = row[2][1]
-#                 if type(target) is not list:
-#                     samples.append({
-#                         "prompt": message,
-#                         "target": json.dumps([target]),
-#                         "input": message,
-#                         "dataset": "LingOly"
-#                     })
-#                 else:
-#                     if type(target[0]) is list:
-#                         one_list_target = []
-#                         for sublist in target:
-#                             one_list_target.extend(sublist)
-#                         target = list(set(one_list_target))
-
-#                     samples.append({
-#                         "prompt": message,
-#                         "target": json.dumps(target),
-#                         "input": message,
-#                         "dataset": "LingOly"
-#                     })
-
-#         return Dataset.from_list(samples)
-
-#     elif dataset_name == "logic_puzzles":
-#         dataset = load_dataset(
-#             'json', split="train",
-#             data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
-#         )
-
-#         mapped_dataset = dataset.map(
-#             generate_prompt,
-#             fn_kwargs={
-#                 "prompt_name": prompt_name, "dataset": dataset_name,
-#                 "similarity": similarity_functions[similarity],
-#                 "full_dataset": dataset if include_full_dataset else None,
-#             },
-#             load_from_cache_file=False
-#         )
-
-#         final_dataset = mapped_dataset.rename_column("problem", "input")
-#         final_dataset = final_dataset.remove_columns(["options"])
-
-#         return final_dataset
+    return wrapped_dataset
 
 
 # the code is taken from KV Aditya Srivatsa and Mukund Choudhary
@@ -300,6 +344,13 @@ class PromptBuilder:
         self.single_data_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n"
         self.single_question_text_template = "<<SRC_LANG>>: \"<<SRC_TEXT>>\""
 
+    def get_data_and_question(self, data, qna_row):
+        # new code from me
+        data_text = self.build_data_text(data)
+        question_text = self.build_question_text(qna_row)
+
+        return data_text, question_text
+
     def build_prompt_message(self, data, qna_row, qna_whole, **kwargs):
         task_prompt = self.build_task_prompt(
             data, qna_row, qna_whole, **kwargs
@@ -309,19 +360,10 @@ class PromptBuilder:
     def build_task_prompt(self, data, qna_row, qna_whole=None, language=None):
         data_text = self.build_data_text(data)
         question_text = self.build_question_text(qna_row)
-        all_questions_text = '\n\n'.join(
-            [self.build_question_text(qna_r) for qna_r in qna_whole]) \
-            if qna_whole is not None else ""
-
-        lang = [lang_name for lang_name in [data[0][1][0], data[0][2][0]]
-                if lang_name.lower().strip() != "english"][0] \
-            if language is None else language
 
         span_dict = {
-            "<<LANG>>": lang,
             "<<DATA>>": data_text,
-            "<<QUESTION>>": question_text,
-            "<<ALL_QUESTIONS>>": all_questions_text,
+            "<<QUESTION>>": question_text
         }
         task_prompt = replace_spans(self.task_prompt_template, span_dict)
         return task_prompt
@@ -368,16 +410,3 @@ class PromptBuilder:
             )
 
         return question_text
-
-
-def replace_spans(template, span_dict):
-    text = template
-    for k, v in span_dict.items():
-        text = text.replace(k, v)
-    return text
-
-
-def normalize_unicode(s):
-    for x in re.findall(r"\\u([\da-f]{4})", s):
-        s = s.replace(f"\\u{x}", chr(int(x, 16)))
-    return s

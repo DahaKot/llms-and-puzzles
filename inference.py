@@ -1,7 +1,5 @@
 from tqdm import tqdm
-# from utils import , check_answer_against_correct
 from dataset_preparation import get_dataset_with_prompts
-
 from torch.utils.data import DataLoader
 from args_parser import get_args
 from vllm import LLM, SamplingParams
@@ -83,4 +81,4 @@ if __name__ == "__main__":
             "\nInput: " + input + "\nPrediction: " + prediction
             + "\nCorrect Answer: " + correct_answer
             + "\nCounted?" + str(is_counted)
-    )
+        )
