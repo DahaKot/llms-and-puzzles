@@ -3,6 +3,7 @@ from datasets import load_dataset, Dataset  # type: ignore
 import json
 import random
 from utils import replace_spans
+import re
 
 
 class MyDataset():
@@ -64,13 +65,21 @@ class CrypticCrosswords(MyDataset):
 
         return example
 
+    def _too_similar(self, example1, example2):
+        return example1["target"] in example2["target"] \
+               or example2["target"] in example1["target"]
+
     def random_similarity(self, example):
         # here maybe we need a filter so that there is no clue with the same
         # answer in the examples
         random.seed(42)
-        random_indices = random.sample(range(len(self.dataset)), self.n_shots)
 
-        examples = [self.dataset[i] for i in random_indices]
+        examples = []
+        while len(examples) < self.n_shots:
+            random_index = random.sample(range(len(self.dataset)), 1)
+
+            if not self._too_similar(self.dataset[random_index], example):
+                examples.append(self.dataset[random_index])
 
         data = {}
 
@@ -126,6 +135,7 @@ class RosettaStone(MyDataset):
         for d in dataset:
             data = d["cleaned_data"]["data"]
             qna = d["cleaned_data"]["qna"]
+            language = re.sub(r"[\\d\\s]+", "", d["name"])
             for row in qna:
                 train_data, question = prompt_builder.get_data_and_question(
                     data, qna_row=row
@@ -135,7 +145,8 @@ class RosettaStone(MyDataset):
                     "question": question,
                     "target": json.dumps([row[2][1]]),
                     "input": train_data + "\n\n" + question,
-                    "dataset": "ModeLing"
+                    "dataset": "ModeLing",
+                    "language": language
                 })
 
         return samples
@@ -151,6 +162,7 @@ class RosettaStone(MyDataset):
         for d in dataset:
             data = d["data"]
             qna = d["qna"]
+            language = d["language"]
             for row in qna:
                 train_data, question = prompt_builder.get_data_and_question(
                     data, qna_row=row
@@ -173,7 +185,8 @@ class RosettaStone(MyDataset):
                     "question": question,
                     "target": target_list,
                     "input": train_data + "\n\n" + question,
-                    "dataset": "LingOly"
+                    "dataset": "LingOly",
+                    "language": language
                 })
 
         return samples
@@ -193,12 +206,19 @@ class RosettaStone(MyDataset):
 
         return example
 
+    def _too_similar(self, example1, example2):
+        return example1["language"] == example2["language"]
+
     def random_similarity(self, example):
         # here we need to filter the same languages
         random.seed(42)
-        random_indices = random.sample(range(len(self.dataset)), self.n_shots)
 
-        examples = [self.dataset[i] for i in random_indices]
+        examples = []
+        while len(examples) < self.n_shots:
+            random_index = random.sample(range(len(self.dataset)), 1)
+
+            if not self._too_similar(self.dataset[random_index], example):
+                examples.append(self.dataset[random_index])
 
         data = {}
 
@@ -284,13 +304,20 @@ class LogicPuzzles(MyDataset):
 
         return example
 
+    def _too_similar(self, example1, example2):
+        return example1["problem"] == example2["problem"]
+
     def random_similarity(self, example):
         letter_options = ["A", "B", "C", "D", "E"]
 
         random.seed(42)
-        random_indices = random.sample(range(len(self.dataset)), self.n_shots)
 
-        examples = [self.dataset[i] for i in random_indices]
+        examples = []
+        while len(examples) < self.n_shots:
+            random_index = random.sample(range(len(self.dataset)), 1)
+
+            if not self._too_similar(self.dataset[random_index], example):
+                examples.append(self.dataset[random_index])
 
         data = {}
 
