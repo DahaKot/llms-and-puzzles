@@ -50,7 +50,8 @@ Answer:
 Clue:
 {clue}
 Answer:
-[/INST]''',
+[/INST]
+''',
 "zero_shot_chain_of_thought_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue.
 Clue:
 {clue}
@@ -63,7 +64,8 @@ A cryptic clue typically consists of a definition and a wordplay. The definition
 Extract the definition and the wordplay from the clue, then use them to solve it. Finally, provide the answer in the format "Answer: ...".
 Clue:
 {clue}
-[/INST]''',
+[/INST]
+''',
 "5_shot_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
 Examples:
 Clue:
@@ -167,11 +169,11 @@ Sentence to translate:
 {question}
 Answer:
 ''',
-"base_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate.
+"base_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Parallel sentences:
 {data}
 
-Translate the sentence and provide only the answer.
+Sentence to translate:
 {question}
 Answer:
 [/INST]
@@ -307,15 +309,25 @@ Possible answers:
 {options}
 Answer:
 ''',
-"base_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the number of the correct option.
+"base_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
 {problem}
 Possible answers:
 {options}
 Answer:
-[/INST]''',
+[/INST]
+''',
+"zero_shot_chain_of_thought_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide the letter of the correct option in the format: "answer: <option letter>".
+Puzzle:
+{problem}
+Possible answers:
+{options}
+Answer:
+Let's think step by step.
+[/INST]
+''',
 "advanced_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
-Solve the puzzle. Finally, provide the number of the correct option in the format "Answer: ...".
+Solve the puzzle. Finally, provide the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
 {problem}
 Possible answers:
