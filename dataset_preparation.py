@@ -96,7 +96,8 @@ class CrypticCrosswords(MyDataset):
         pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
-        return correct_answer.lower() in prediction.lower()
+        pattern = rf'\b{re.escape(correct_answer.lower())}\b'
+        return bool(re.search(pattern, prediction.lower()))
 
 
 class RosettaStone(MyDataset):
