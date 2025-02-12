@@ -8,7 +8,7 @@ import re
 
 class MyDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
-                 n_shots=0):
+                 order="random", n_shots=0):
         # options for the dataset_name are:
         # cryptic_crosswords, rosetta_stone, logic_puzzles
         self.dataset_name = dataset_name
@@ -20,29 +20,31 @@ class MyDataset():
             "thematic": self.thematic_similarity
         }
         self.similarity = self.similarity_functions[similarity]
+        self.order = order
 
         self.n_shots = n_shots
 
     def check_answer_against_correct(prediction, correct_answer):
         pass
 
-    def random_similarity(example, dataset):
+    def random_similarity(example):
         pass
 
-    def semantic_similarity(example, dataset):
+    def semantic_similarity(example):
         pass
 
-    def thematic_similarity(example, dataset):
+    def thematic_similarity(example):
         pass
 
-    def generate_prompt(example, dataset_name, prompt_name, similarity):
+    def generate_prompt(example, prompt_name, similarity):
         pass
 
 
 class CrypticCrosswords(MyDataset):
-    def __init__(self, prompt_name, similarity, n_shots=0):
+    def __init__(
+            self, prompt_name, similarity="random", order="random", n_shots=0):
         super().__init__(
-            "cryptic_crosswords", prompt_name, similarity, n_shots
+            "cryptic_crosswords", prompt_name, similarity, order, n_shots
         )
 
         self.dataset = load_dataset("boda/guardian_naive_random", split="test")
@@ -101,9 +103,10 @@ class CrypticCrosswords(MyDataset):
 
 
 class RosettaStone(MyDataset):
-    def __init__(self, prompt_name, similarity, n_shots=0):
+    def __init__(
+            self, prompt_name, similarity="random", order="random", n_shots=0):
         super().__init__(
-            "rosetta_stone", prompt_name, similarity, n_shots
+            "rosetta_stone", prompt_name, similarity, order, n_shots
         )
 
         self.modeling_raw = json.load(open(
@@ -244,9 +247,10 @@ class RosettaStone(MyDataset):
 
 
 class LogicPuzzles(MyDataset):
-    def __init__(self, prompt_name, similarity, n_shots=0):
+    def __init__(
+            self, prompt_name, similarity="random", order="random", n_shots=0):
         super().__init__(
-            "logic_puzzles", prompt_name, similarity, n_shots
+            "logic_puzzles", prompt_name, similarity, order, n_shots
         )
 
         self.dataset = load_dataset(
@@ -353,7 +357,9 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base",
         "logic_puzzles": LogicPuzzles
     }
 
-    wrapped_dataset = datasets[dataset_name](prompt_name, similarity, n_shots)
+    wrapped_dataset = datasets[dataset_name](
+        prompt_name, similarity, order, n_shots
+    )
 
     return wrapped_dataset
 
