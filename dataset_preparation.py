@@ -78,7 +78,7 @@ class CrypticCrosswords(MyDataset):
 
         examples = []
         while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)
+            random_index = random.sample(range(len(self.dataset)), 1)[0]
 
             if not self._too_similar(self.dataset[random_index], example):
                 examples.append(self.dataset[random_index])
@@ -219,18 +219,17 @@ class RosettaStone(MyDataset):
 
         examples = []
         while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)
+            random_index = random.sample(range(len(self.dataset)), 1)[0]
 
             if not self._too_similar(self.dataset[random_index], example):
                 examples.append(self.dataset[random_index])
 
         data = {}
 
-        for i, example in enumerate(examples):
-            data["data" + str(i + 1)] = example["data"]
-            data["question" + str(i + 1)] = example["question"]
-
-            one_correct_answer = json.loads(example["target"])[0]
+        for i, sample in enumerate(examples):
+            data["data" + str(i + 1)] = sample["data"]
+            data["question" + str(i + 1)] = sample["question"]
+            one_correct_answer = json.loads(sample["target"])[0]
             data["answer" + str(i + 1)] = one_correct_answer
 
         return data
@@ -319,18 +318,18 @@ class LogicPuzzles(MyDataset):
 
         examples = []
         while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)
+            random_index = random.sample(range(len(self.dataset)), 1)[0]
 
             if not self._too_similar(self.dataset[random_index], example):
                 examples.append(self.dataset[random_index])
 
         data = {}
 
-        for i, example in enumerate(examples):
-            data["problem" + str(i + 1)] = example["problem"]
-            data["answer" + str(i + 1)] = letter_options[example["answer"] - 1]
+        for i, sample in enumerate(examples):
+            data["problem" + str(i + 1)] = sample["problem"]
+            data["answer" + str(i + 1)] = letter_options[sample["answer"] - 1]
             data["options" + str(i + 1)] = self._generate_options_string(
-                example
+                sample
             )
 
         return data
