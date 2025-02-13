@@ -44,7 +44,6 @@ Answer:
 
 Clue:
 {clue}
-Answer:
 ''',
 "base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
 Clue:
@@ -95,7 +94,6 @@ Answer:
 
 Clue:
 {clue}
-Answer:
 [/INST]
 '''
 }
@@ -167,7 +165,6 @@ Parallel sentences:
 
 Sentence to translate:
 {question}
-Answer:
 ''',
 "base_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Parallel sentences:
@@ -239,7 +236,6 @@ Parallel sentences:
 
 Sentence to translate:
 {question}
-Answer:
 [/INST]
 ''',
 }
@@ -307,7 +303,6 @@ Puzzle:
 {problem}
 Possible answers:
 {options}
-Answer:
 ''',
 "base_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
@@ -374,7 +369,6 @@ Puzzle:
 {problem}
 Possible answers:
 {options}
-Answer:
 [/INST]
 ''',
 }
