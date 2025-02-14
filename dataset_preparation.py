@@ -85,6 +85,8 @@ class BaseDataset():
         return self._map_examples_to_dict(examples)
 
     def thematic_similarity(self, example):
+        # i suggest ordering by semantic similarity be default and then call
+        # ranking function
         pass
 
     def random_ranking(self, example_list):
@@ -96,10 +98,10 @@ class BaseDataset():
         return permuted_list
 
     def semantic_ranking_top_to_bottom(self, example_list):
-        pass
+        return example_list
 
     def semantic_ranking_bottom_to_top(self, example_list):
-        pass
+        return example_list[::-1]
 
     def generate_prompt(self, example, prompt_name, similarity):
         pass
@@ -152,6 +154,28 @@ class CrypticCrosswords(BaseDataset):
     def check_answer_against_correct(self, prediction, correct_answer):
         pattern = rf'\b{re.escape(correct_answer.lower())}\b'
         return bool(re.search(pattern, prediction.lower()))
+
+
+class CrypticCrosswordsExtended(CrypticCrosswords):
+    def __init__(
+            self, prompt_name, similarity="random", ranking="random",
+            n_shots=0):
+        self.dataset = load_dataset(
+            "csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
+        )["train"]
+        self.embedding_field = "input"
+
+        BaseDataset.__init__(
+            self, "cryptic_crosswords", prompt_name, similarity, ranking,
+            n_shots
+        )
+
+        self.mapped_dataset = self.dataset.map(
+            self.generate_prompt,
+            fn_kwargs={"prompt_name": prompt_name},
+            load_from_cache_file=False,
+            with_indices=True
+        )
 
 
 class RosettaStone(BaseDataset):
@@ -382,8 +406,9 @@ class LogicPuzzles(BaseDataset):
 def get_dataset_with_prompts(dataset_name, prompt_name="base",
                              similarity="random", ranking="random", n_shots=0):
     datasets = {
-        "cryptic_crosswords": CrypticCrosswords, "rosetta_stone": RosettaStone,
-        "logic_puzzles": LogicPuzzles
+        "cryptic_crosswords": CrypticCrosswords,
+        "cryptic_crosswords_extended": CrypticCrosswordsExtended,
+        "rosetta_stone": RosettaStone, "logic_puzzles": LogicPuzzles
     }
 
     wrapped_dataset = datasets[dataset_name](
