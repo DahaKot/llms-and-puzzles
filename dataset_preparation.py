@@ -5,15 +5,13 @@ import random
 from utils import replace_spans
 import re
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
 import numpy as np
-import torch
-from tqdm import tqdm
 
 RANDOM_SEED = 5
 
 
-class MyDataset():
+class BaseDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
                  ranking="random", n_shots=0):
         # options for the dataset_name are:
@@ -35,6 +33,11 @@ class MyDataset():
         }
         self.ranking = self.ranking_functions[ranking]
 
+        self.embeddings = None
+        if self.similarity.__name__.startswith("semantic") \
+                or self.ranking.__name__.startswith("semantic"):
+            self.embeddings = self._get_embeddings()
+
         self.n_shots = n_shots
         random.seed(RANDOM_SEED)
 
@@ -44,11 +47,42 @@ class MyDataset():
     def _too_similar(self, example1, example2):
         pass
 
-    def random_similarity(self, example):
-        pass
+    def _get_embeddings(self):
+        model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    def semantic_similarity(self, example):
-        pass
+        clues = [example[self.embedding_field] for example in self.dataset]
+
+        embeddings = model.encode(clues, convert_to_tensor=True)
+        return embeddings
+
+    def random_similarity(self, example, index=None):
+        examples = []
+        while len(examples) < self.n_shots:
+            index = random.sample(range(len(self.dataset)), 1)[0]
+
+            if not self._too_similar(self.dataset[index], example, examples):
+                examples.append(self.dataset[index])
+
+        return self._map_examples_to_dict(examples)
+
+    def semantic_similarity(self, example, index):
+        similarities = cosine_similarity(
+            self.embeddings[index].reshape(1, -1), self.embeddings
+        )
+
+        indices = np.argsort(similarities)[0][::-1]
+
+        examples = []
+        i = 0
+        while len(examples) < self.n_shots:
+            index = int(indices[i])
+            if not self._too_similar(self.dataset[index], example, examples):
+                examples.append(self.dataset[index])
+            i += 1
+
+        examples = self.ranking(examples)
+
+        return self._map_examples_to_dict(examples)
 
     def thematic_similarity(self, example):
         pass
@@ -71,72 +105,42 @@ class MyDataset():
         pass
 
 
-class CrypticCrosswords(MyDataset):
+class CrypticCrosswords(BaseDataset):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0):
+        self.dataset = load_dataset("boda/guardian_naive_random", split="test")
+        # self.dataset = self.dataset.select(range(100))
+        self.embedding_field = "input"
+
         super().__init__(
             "cryptic_crosswords", prompt_name, similarity, ranking, n_shots
         )
 
-        self.dataset = load_dataset("boda/guardian_naive_random", split="test")
-
-        embeddings = None
-        if self.similarity.__name__.startswith("semantic") \
-                or self.ranking.__name__.startswith("semantic"):
-            embeddings = self._get_embeddings()
-
         self.mapped_dataset = self.dataset.map(
             self.generate_prompt,
-            fn_kwargs={"prompt_name": prompt_name, "embeddings": embeddings},
+            fn_kwargs={"prompt_name": prompt_name},
             load_from_cache_file=False,
             with_indices=True
         )
 
-    def _get_embeddings(self):
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-
-        clues = [example["input"] for example in self.dataset]
-
-        # Process in batches
-        embeddings_list = []
-        batch_size = 256
-        for i in tqdm(range(0, len(clues), batch_size)):
-            batch_clues = clues[i:i + batch_size]
-            batch_embeddings = model.encode(
-                batch_clues, convert_to_tensor=True
-            )
-            embeddings_list.append(batch_embeddings)
-
-        # Concatenate all embeddings
-        embeddings = torch.cat(embeddings_list)
-        print("All embeddings processed")
-        return embeddings
-
-    def generate_prompt(self, example, index, prompt_name, embeddings=None):
+    def generate_prompt(self, example, index, prompt_name):
         clue = example['input']
         prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
 
         if self.n_shots:
-            few_shot_examples = self.similarity(example, index, embeddings)
+            few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
         else:
             example["prompt"] = prompt.format(clue=clue)
 
         return example
 
-    def _too_similar(self, example1, example2):
+    def _too_similar(self, example1, example2, examples):
         return example1["target"] in example2["target"] \
                or example2["target"] in example1["target"]
 
-    def random_similarity(self, example, embeddings=None):
-        examples = []
-        while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)[0]
-
-            if not self._too_similar(self.dataset[random_index], example):
-                examples.append(self.dataset[random_index])
-
+    def _map_examples_to_dict(self, examples):
         data = {}
 
         for i, example in enumerate(examples):
@@ -144,47 +148,17 @@ class CrypticCrosswords(MyDataset):
             data["answer" + str(i + 1)] = example["target"]
 
         return data
-
-    def semantic_similarity(self, example, index, embeddings):
-        similarities = cosine_similarity(
-            embeddings[index].reshape(1, -1), embeddings
-        )
-
-        indices = np.argsort(similarities)[::-1][0]
-
-        examples = []
-        i = 0
-        while len(examples) < self.n_shots:
-            index = int(indices[i])
-            if not self._too_similar(self.dataset[index], example):
-                examples.append(self.dataset[index])
-            i += 1
-
-        # examples = self.ranking(examples)
-
-        data = {}
-
-        for i, example in enumerate(examples):
-            data["clue" + str(i + 1)] = example["input"]
-            data["answer" + str(i + 1)] = example["target"]
-
-        return data
-
-    def thematic_similarity(self, example, embeddings=None):
-        pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
         pattern = rf'\b{re.escape(correct_answer.lower())}\b'
         return bool(re.search(pattern, prediction.lower()))
 
 
-class RosettaStone(MyDataset):
+class RosettaStone(BaseDataset):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0):
-        super().__init__(
-            "rosetta_stone", prompt_name, similarity, ranking, n_shots
-        )
+        self.embedding_field = "data"
 
         self.modeling_raw = json.load(open(
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
@@ -193,15 +167,21 @@ class RosettaStone(MyDataset):
             "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
         ))
 
+        self.prompt_name = prompt_name
+
         modeling_data = self._load_modeling_data()
         lingoly_data = self._load_lingoly_data()
         combined_samples = modeling_data + lingoly_data
 
         self.dataset = Dataset.from_list(combined_samples)
 
+        super().__init__(
+            "rosetta_stone", prompt_name, similarity, ranking, n_shots
+        )
+
         self.mapped_dataset = self.dataset.map(
             self.generate_prompt,
-            fn_kwargs={"prompt_name": prompt_name},
+            fn_kwargs={"prompt_name": self.prompt_name},
             load_from_cache_file=False,
             with_indices=True
         )
@@ -217,7 +197,7 @@ class RosettaStone(MyDataset):
         for d in dataset:
             data = d["cleaned_data"]["data"]
             qna = d["cleaned_data"]["qna"]
-            language = re.sub(r"[\\d\\s]+", "", d["name"])
+            language = d["name"].split()[0]
             for row in qna:
                 train_data, question = prompt_builder.get_data_and_question(
                     data, qna_row=row
@@ -279,7 +259,7 @@ class RosettaStone(MyDataset):
         prompt = prompts_list.rosetta_stone_prompts[prompt_name]
 
         if self.n_shots:
-            few_shot_examples = self.similarity(example)
+            few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(
                 data=data, question=question, **few_shot_examples
             )
@@ -288,19 +268,12 @@ class RosettaStone(MyDataset):
 
         return example
 
-    def _too_similar(self, example1, example2):
-        return example1["language"] == example2["language"]
+    def _too_similar(self, example1, example2, examples):
+        return example1["language"] == example2["language"] \
+            or example1["language"] in [ex["language"] for ex in examples]
 
-    def random_similarity(self, example, embeddings=None):
-        examples = []
-        while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)[0]
-
-            if not self._too_similar(self.dataset[random_index], example):
-                examples.append(self.dataset[random_index])
-
+    def _map_examples_to_dict(self, examples):
         data = {}
-
         for i, sample in enumerate(examples):
             data["data" + str(i + 1)] = sample["data"]
             data["question" + str(i + 1)] = sample["question"]
@@ -309,28 +282,23 @@ class RosettaStone(MyDataset):
 
         return data
 
-    def semantic_similarity(self, example, embeddings):
-        pass
-
-    def thematic_similarity(self, example, embeddings=None):
-        pass
-
     def check_answer_against_correct(self, prediction, correct_answer):
         correct_answers = json.loads(correct_answer)
         return any([a.lower() in prediction.lower() for a in correct_answers])
 
 
-class LogicPuzzles(MyDataset):
+class LogicPuzzles(BaseDataset):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0):
-        super().__init__(
-            "logic_puzzles", prompt_name, similarity, ranking, n_shots
-        )
-
         self.dataset = load_dataset(
             'json', split="train",
             data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
+        )
+        self.embedding_field = "problem"
+
+        super().__init__(
+            "logic_puzzles", prompt_name, similarity, ranking, n_shots
         )
 
         self.mapped_dataset = self.dataset.map(
@@ -370,7 +338,7 @@ class LogicPuzzles(MyDataset):
         )
 
         if self.n_shots:
-            few_shot_examples = self.similarity(example)
+            few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(
                 problem=problem,
                 options=example["possible_answers_string"], **few_shot_examples
@@ -385,19 +353,11 @@ class LogicPuzzles(MyDataset):
 
         return example
 
-    def _too_similar(self, example1, example2):
+    def _too_similar(self, example1, example2, examples):
         return example1["problem"] == example2["problem"]
 
-    def random_similarity(self, example, embeddings=None):
+    def _map_examples_to_dict(self, examples):
         letter_options = ["A", "B", "C", "D", "E"]
-
-        examples = []
-        while len(examples) < self.n_shots:
-            random_index = random.sample(range(len(self.dataset)), 1)[0]
-
-            if not self._too_similar(self.dataset[random_index], example):
-                examples.append(self.dataset[random_index])
-
         data = {}
 
         for i, sample in enumerate(examples):
@@ -408,12 +368,6 @@ class LogicPuzzles(MyDataset):
             )
 
         return data
-
-    def semantic_similarity(self, example, embeddings):
-        pass
-
-    def thematic_similarity(self, example, embeddings=None):
-        pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
         prediction = prediction.replace("[", "").lower()
