@@ -4,11 +4,16 @@ import json
 import random
 from utils import replace_spans
 import re
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import torch
+from tqdm import tqdm
 
 
 class MyDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
-                 order="random", n_shots=0):
+                 ranking="random", n_shots=0):
         # options for the dataset_name are:
         # cryptic_crosswords, rosetta_stone, logic_puzzles
         self.dataset_name = dataset_name
@@ -20,47 +25,97 @@ class MyDataset():
             "thematic": self.thematic_similarity
         }
         self.similarity = self.similarity_functions[similarity]
-        self.order = order
+
+        self.ranking_functions = {
+            "random": self.random_ranking,
+            "semantic_top_to_bottom": self.semantic_ranking_top_to_bottom,
+            "semantic_bottom_to_top": self.semantic_ranking_bottom_to_top,
+        }
+        self.ranking = self.ranking_functions[ranking]
 
         self.n_shots = n_shots
 
-    def check_answer_against_correct(prediction, correct_answer):
+    def check_answer_against_correct(self, prediction, correct_answer):
         pass
 
-    def random_similarity(example):
+    def _too_similar(self, example1, example2):
         pass
 
-    def semantic_similarity(example):
+    def random_similarity(self, example):
         pass
 
-    def thematic_similarity(example):
+    def semantic_similarity(self, example):
         pass
 
-    def generate_prompt(example, prompt_name, similarity):
+    def thematic_similarity(self, example):
+        pass
+
+    def random_ranking(self, example_list):
+        n = len(example_list)
+        indexes = list(range(n))
+        random.shuffle(indexes)
+
+        permuted_list = [example_list[i] for i in indexes]
+        return permuted_list
+
+    def semantic_ranking_top_to_bottom(self, example_list):
+        pass
+
+    def semantic_ranking_bottom_to_top(self, example_list):
+        pass
+
+    def generate_prompt(self, example, prompt_name, similarity):
         pass
 
 
 class CrypticCrosswords(MyDataset):
     def __init__(
-            self, prompt_name, similarity="random", order="random", n_shots=0):
+            self, prompt_name, similarity="random", ranking="random",
+            n_shots=0):
         super().__init__(
-            "cryptic_crosswords", prompt_name, similarity, order, n_shots
+            "cryptic_crosswords", prompt_name, similarity, ranking, n_shots
         )
 
         self.dataset = load_dataset("boda/guardian_naive_random", split="test")
 
+        embeddings = None
+        if self.similarity.__name__.startswith("semantic") \
+                or self.ranking.__name__.startswith("semantic"):
+            embeddings = self._get_embeddings()
+
         self.mapped_dataset = self.dataset.map(
             self.generate_prompt,
-            fn_kwargs={"prompt_name": prompt_name},
-            load_from_cache_file=False
+            fn_kwargs={"prompt_name": prompt_name, "embeddings": embeddings},
+            load_from_cache_file=False,
+            with_indices=True
         )
 
-    def generate_prompt(self, example, prompt_name):
+    def _get_embeddings(self):
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+
+        clues = [example["input"] for example in self.dataset]
+
+        # Process in batches
+        embeddings_list = []
+        batch_size = 256
+        for i in tqdm(range(0, len(clues), batch_size)):
+            batch_clues = clues[i:i + batch_size]
+            batch_embeddings = model.encode(
+                batch_clues, convert_to_tensor=True
+            )
+            embeddings_list.append(batch_embeddings)
+
+        # Concatenate all embeddings
+        embeddings = torch.cat(embeddings_list)
+        print("All embeddings processed")
+        return embeddings
+
+    def generate_prompt(self, example, index, prompt_name, embeddings=None):
         clue = example['input']
         prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
 
         if self.n_shots:
-            few_shot_examples = self.similarity(example)
+            few_shot_examples = self.similarity(example, index, embeddings)
             example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
         else:
             example["prompt"] = prompt.format(clue=clue)
@@ -71,7 +126,7 @@ class CrypticCrosswords(MyDataset):
         return example1["target"] in example2["target"] \
                or example2["target"] in example1["target"]
 
-    def random_similarity(self, example):
+    def random_similarity(self, example, embeddings=None):
         # here maybe we need a filter so that there is no clue with the same
         # answer in the examples
         random.seed(42)
@@ -91,10 +146,32 @@ class CrypticCrosswords(MyDataset):
 
         return data
 
-    def semantic_similarity(self, example):
-        pass
+    def semantic_similarity(self, example, index, embeddings):
+        similarities = cosine_similarity(
+            embeddings[index].reshape(1, -1), embeddings
+        )
 
-    def thematic_similarity(self, example):
+        indices = np.argsort(similarities)[::-1][0]
+
+        examples = []
+        i = 0
+        while len(examples) < self.n_shots:
+            index = int(indices[i])
+            if not self._too_similar(self.dataset[index], example):
+                examples.append(self.dataset[index])
+            i += 1
+
+        # examples = self.ranking(examples)
+
+        data = {}
+
+        for i, example in enumerate(examples):
+            data["clue" + str(i + 1)] = example["input"]
+            data["answer" + str(i + 1)] = example["target"]
+
+        return data
+
+    def thematic_similarity(self, example, embeddings=None):
         pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
@@ -104,9 +181,10 @@ class CrypticCrosswords(MyDataset):
 
 class RosettaStone(MyDataset):
     def __init__(
-            self, prompt_name, similarity="random", order="random", n_shots=0):
+            self, prompt_name, similarity="random", ranking="random",
+            n_shots=0):
         super().__init__(
-            "rosetta_stone", prompt_name, similarity, order, n_shots
+            "rosetta_stone", prompt_name, similarity, ranking, n_shots
         )
 
         self.modeling_raw = json.load(open(
@@ -125,7 +203,8 @@ class RosettaStone(MyDataset):
         self.mapped_dataset = self.dataset.map(
             self.generate_prompt,
             fn_kwargs={"prompt_name": prompt_name},
-            load_from_cache_file=False
+            load_from_cache_file=False,
+            with_indices=True
         )
 
     def _load_modeling_data(self):
@@ -195,7 +274,7 @@ class RosettaStone(MyDataset):
 
         return samples
 
-    def generate_prompt(self, example, prompt_name):
+    def generate_prompt(self, example, index, prompt_name):
         data = example['data']
         question = example['question']
         prompt = prompts_list.rosetta_stone_prompts[prompt_name]
@@ -213,7 +292,7 @@ class RosettaStone(MyDataset):
     def _too_similar(self, example1, example2):
         return example1["language"] == example2["language"]
 
-    def random_similarity(self, example):
+    def random_similarity(self, example, embeddings=None):
         # here we need to filter the same languages
         random.seed(42)
 
@@ -234,10 +313,10 @@ class RosettaStone(MyDataset):
 
         return data
 
-    def semantic_similarity(self, example):
+    def semantic_similarity(self, example, embeddings):
         pass
 
-    def thematic_similarity(self, example):
+    def thematic_similarity(self, example, embeddings=None):
         pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
@@ -247,9 +326,10 @@ class RosettaStone(MyDataset):
 
 class LogicPuzzles(MyDataset):
     def __init__(
-            self, prompt_name, similarity="random", order="random", n_shots=0):
+            self, prompt_name, similarity="random", ranking="random",
+            n_shots=0):
         super().__init__(
-            "logic_puzzles", prompt_name, similarity, order, n_shots
+            "logic_puzzles", prompt_name, similarity, ranking, n_shots
         )
 
         self.dataset = load_dataset(
@@ -262,7 +342,8 @@ class LogicPuzzles(MyDataset):
             fn_kwargs={
                 "prompt_name": prompt_name
             },
-            load_from_cache_file=False
+            load_from_cache_file=False,
+            with_indices=True
         )
 
         self.mapped_dataset = self.mapped_dataset.rename_column(
@@ -284,7 +365,7 @@ class LogicPuzzles(MyDataset):
 
         return options
 
-    def generate_prompt(self, example, prompt_name):
+    def generate_prompt(self, example, index, prompt_name):
         problem = example["problem"]
         prompt = prompts_list.logic_puzzles_prompts[prompt_name]
 
@@ -311,7 +392,7 @@ class LogicPuzzles(MyDataset):
     def _too_similar(self, example1, example2):
         return example1["problem"] == example2["problem"]
 
-    def random_similarity(self, example):
+    def random_similarity(self, example, embeddings=None):
         letter_options = ["A", "B", "C", "D", "E"]
 
         random.seed(42)
@@ -334,30 +415,31 @@ class LogicPuzzles(MyDataset):
 
         return data
 
-    def semantic_similarity(self, example):
+    def semantic_similarity(self, example, embeddings):
         pass
 
-    def thematic_similarity(self, example):
+    def thematic_similarity(self, example, embeddings=None):
         pass
 
     def check_answer_against_correct(self, prediction, correct_answer):
         prediction = prediction.replace("[", "").lower()
-        answer_position = prediction.find("answer: ")
-        if answer_position < 0:
+
+        match = re.search(r"answer:\s*(\S)", prediction)
+        if not match:
             return False
-        answer = prediction[answer_position + 8: answer_position + 9]
+        answer = match.group(1)
         return answer.lower() == correct_answer.lower()
 
 
 def get_dataset_with_prompts(dataset_name, prompt_name="base",
-                             similarity="random", order="random", n_shots=0):
+                             similarity="random", ranking="random", n_shots=0):
     datasets = {
         "cryptic_crosswords": CrypticCrosswords, "rosetta_stone": RosettaStone,
         "logic_puzzles": LogicPuzzles
     }
 
     wrapped_dataset = datasets[dataset_name](
-        prompt_name, similarity, order, n_shots
+        prompt_name, similarity, ranking, n_shots
     )
 
     return wrapped_dataset
