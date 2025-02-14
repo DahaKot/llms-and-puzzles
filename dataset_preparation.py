@@ -10,6 +10,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+RANDOM_SEED = 5
+
 
 class MyDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
@@ -34,6 +36,7 @@ class MyDataset():
         self.ranking = self.ranking_functions[ranking]
 
         self.n_shots = n_shots
+        random.seed(RANDOM_SEED)
 
     def check_answer_against_correct(self, prediction, correct_answer):
         pass
@@ -127,10 +130,6 @@ class CrypticCrosswords(MyDataset):
                or example2["target"] in example1["target"]
 
     def random_similarity(self, example, embeddings=None):
-        # here maybe we need a filter so that there is no clue with the same
-        # answer in the examples
-        random.seed(42)
-
         examples = []
         while len(examples) < self.n_shots:
             random_index = random.sample(range(len(self.dataset)), 1)[0]
@@ -293,9 +292,6 @@ class RosettaStone(MyDataset):
         return example1["language"] == example2["language"]
 
     def random_similarity(self, example, embeddings=None):
-        # here we need to filter the same languages
-        random.seed(42)
-
         examples = []
         while len(examples) < self.n_shots:
             random_index = random.sample(range(len(self.dataset)), 1)[0]
@@ -394,8 +390,6 @@ class LogicPuzzles(MyDataset):
 
     def random_similarity(self, example, embeddings=None):
         letter_options = ["A", "B", "C", "D", "E"]
-
-        random.seed(42)
 
         examples = []
         while len(examples) < self.n_shots:
