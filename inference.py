@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     wrapped = get_dataset_with_prompts(
         args.dataset, args.prompt_name, similarity=args.similarity,
-        order=args.order, n_shots=args.n_shots
+        ranking=args.ranking, n_shots=args.n_shots
     )
     dataset = wrapped.mapped_dataset
     dataset_length = len(dataset)
