@@ -34,9 +34,17 @@ class BaseDataset():
         self.ranking = self.ranking_functions[ranking]
 
         self.embeddings = None
-        if self.similarity.__name__.startswith("semantic") \
-                or self.ranking.__name__.startswith("semantic"):
+        if similarity in ["semantic", "thematic"]:
             self.embeddings = self._get_embeddings()
+
+        if self.similarity.__name__.startswith("thematic"):
+            self.type_dict = {}
+            for i, example in enumerate(self.dataset):
+                type = example["type"]
+                if type in self.type_dict:
+                    self.type_dict[type].append(i)
+                else:
+                    self.type_dict[type] = [i]
 
         self.n_shots = n_shots
         random.seed(RANDOM_SEED)
@@ -84,10 +92,34 @@ class BaseDataset():
 
         return self._map_examples_to_dict(examples)
 
-    def thematic_similarity(self, example):
-        # i suggest ordering by semantic similarity be default and then call
-        # ranking function
-        pass
+    def thematic_similarity(self, example, index):
+        similarities = cosine_similarity(
+            self.embeddings[index].reshape(1, -1), self.embeddings
+        )
+
+        indices = np.argsort(similarities)[0][::-1]
+
+        # filter indices by type
+        indices = list(filter(
+            lambda x: x in self.type_dict[example["type"]], indices
+        ))
+
+        # now we have examples of the same type sorted by semantic similarity
+        # if we don't shuffle, examples list will be filled with most similar
+        if self.ranking.__name__.startswith("random"):
+            indices = self.ranking(indices)
+
+        examples = []
+        i = 0
+        while len(examples) < self.n_shots:
+            index = int(indices[i])
+            if not self._too_similar(self.dataset[index], example, examples):
+                examples.append(self.dataset[index])
+            i += 1
+
+        examples = self.ranking(examples)
+
+        return self._map_examples_to_dict(examples)
 
     def random_ranking(self, example_list):
         n = len(example_list)
@@ -140,7 +172,8 @@ class CrypticCrosswords(BaseDataset):
 
     def _too_similar(self, example1, example2, examples):
         return example1["target"] in example2["target"] \
-               or example2["target"] in example1["target"]
+               or example2["target"] in example1["target"] \
+               or example1 in examples
 
     def _map_examples_to_dict(self, examples):
         data = {}
@@ -156,7 +189,7 @@ class CrypticCrosswords(BaseDataset):
         return bool(re.search(pattern, prediction.lower()))
 
 
-class CrypticCrosswordsExtended(CrypticCrosswords):
+class CrypticCrosswordsTypes(CrypticCrosswords):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0):
@@ -311,6 +344,33 @@ class RosettaStone(BaseDataset):
         return any([a.lower() in prediction.lower() for a in correct_answers])
 
 
+class RosettaStoneTypes(RosettaStone):
+    def __init__(
+            self, prompt_name, similarity="random", ranking="random",
+            n_shots=0):
+        self.embedding_field = "data"
+
+        self.modeling_raw = json.load(open(
+            "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
+        ))
+
+        self.prompt_name = prompt_name
+
+        modeling_data = self._load_modeling_data()
+        self.dataset = Dataset.from_list(modeling_data)
+
+        BaseDataset.__init__(
+            "rosetta_stone", prompt_name, similarity, ranking, n_shots
+        )
+
+        self.mapped_dataset = self.dataset.map(
+            self.generate_prompt,
+            fn_kwargs={"prompt_name": self.prompt_name},
+            load_from_cache_file=False,
+            with_indices=True
+        )
+
+
 class LogicPuzzles(BaseDataset):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
@@ -318,6 +378,9 @@ class LogicPuzzles(BaseDataset):
         self.dataset = load_dataset(
             'json', split="train",
             data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
+        )
+        self.dataset = self.dataset.rename_column(
+            "task", "type"
         )
         self.embedding_field = "problem"
 
@@ -378,7 +441,8 @@ class LogicPuzzles(BaseDataset):
         return example
 
     def _too_similar(self, example1, example2, examples):
-        return example1["problem"] == example2["problem"]
+        return example1["problem"] == example2["problem"] \
+                or example1 in examples
 
     def _map_examples_to_dict(self, examples):
         letter_options = ["A", "B", "C", "D", "E"]
@@ -407,8 +471,9 @@ def get_dataset_with_prompts(dataset_name, prompt_name="base",
                              similarity="random", ranking="random", n_shots=0):
     datasets = {
         "cryptic_crosswords": CrypticCrosswords,
-        "cryptic_crosswords_extended": CrypticCrosswordsExtended,
-        "rosetta_stone": RosettaStone, "logic_puzzles": LogicPuzzles
+        "cryptic_crosswords_types": CrypticCrosswordsTypes,
+        "rosetta_stone": RosettaStone,
+        "rosetta_stone_types": RosettaStoneTypes, "logic_puzzles": LogicPuzzles
     }
 
     wrapped_dataset = datasets[dataset_name](
