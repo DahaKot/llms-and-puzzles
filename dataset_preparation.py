@@ -5,8 +5,9 @@ import random
 from utils import replace_spans
 import re
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
+from torch.nn.functional import cosine_similarity  # type: ignore
 import numpy as np
+import torch
 
 RANDOM_SEED = 567
 
@@ -78,7 +79,7 @@ class BaseDataset():
             self.embeddings[index].reshape(1, -1), self.embeddings
         )
 
-        indices = np.argsort(similarities)[0][::-1]
+        indices = torch.argsort(similarities, descending=True)
 
         examples = []
         i = 0
@@ -97,7 +98,7 @@ class BaseDataset():
             self.embeddings[index].reshape(1, -1), self.embeddings
         )
 
-        indices = np.argsort(similarities)[0][::-1]
+        indices = torch.argsort(similarities, descending=True)
 
         # filter indices by type
         indices = list(filter(
