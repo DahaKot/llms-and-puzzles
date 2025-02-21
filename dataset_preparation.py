@@ -8,8 +8,6 @@ from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity  # type: ignore
 import torch
 
-RANDOM_SEED = 567
-
 
 class BaseDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
