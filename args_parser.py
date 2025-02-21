@@ -16,6 +16,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--n_shots", type=int, default=5)
     parser.add_argument("--max_tokens", type=int, default=256)
     parser.add_argument("--logprobs", type=int, default=1)
+    parser.add_argument("--random_seed", type=int, default=42)
     parser.add_argument(
         "--dataset", type=str,
         choices=["cryptic_crosswords", "rosetta_stone", "logic_puzzles"]
@@ -37,5 +38,5 @@ def add_args(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--ranking", type=str, default="random",
-        choices=["random", "most_similar", "least_similar"]
+        choices=["random", "semantic_top_to_bottom", "semantic_bottom_to_top"]
     )
