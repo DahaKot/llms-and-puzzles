@@ -38,5 +38,5 @@ def add_args(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "--ranking", type=str, default="random",
-        choices=["random", "most_similar", "least_similar"]
+        choices=["random", "semantic_top_to_bottom", "semantic_bottom_to_top"]
     )
