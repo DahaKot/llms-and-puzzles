@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=cryptic_crosswords_mixtral_random_shots # Job name
+#SBATCH --job-name=logic_puzzles_mixtral_random_shots # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -16,32 +16,32 @@ echo "starting Evaluation......................."
 
 nvidia-smi
 
-dataset_name="cryptic_crosswords"
-batch_size=256
-max_tokens=256
+dataset_name="logic_puzzles"
+batch_size=64
+max_tokens=512
 model="mixtral"
 
-python inference.py --run_name="cryptic_crosswords_mixtral_random_shots1" \
+python inference.py --run_name="logic_puzzles_mixtral_random_shots1" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity="random" --ranking="random" --random_seed=1
 
-python inference.py --run_name="cryptic_crosswords_mixtral_random_shots2" \
+python inference.py --run_name="logic_puzzles_mixtral_random_shots2" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity="random" --ranking="random" --random_seed=2
 
-python inference.py --run_name="cryptic_crosswords_mixtral_random_shots3" \
+python inference.py --run_name="logic_puzzles_mixtral_random_shots3" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity="random" --ranking="random" --random_seed=3
 
-python inference.py --run_name="cryptic_crosswords_mixtral_random_shots4" \
+python inference.py --run_name="logic_puzzles_mixtral_random_shots4" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity="random" --ranking="random" --random_seed=4
 
-python inference.py --run_name="cryptic_crosswords_mixtral_random_shots5" \
+python inference.py --run_name="logic_puzzles_mixtral_random_shots5" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity="random" --ranking="random" --random_seed=5
