@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
 import numpy as np
 
-RANDOM_SEED = 567
+RANDOM_SEED = 89201
 
 
 class BaseDataset():
