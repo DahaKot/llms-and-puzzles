@@ -19,7 +19,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--random_seed", type=int, default=42)
     parser.add_argument(
         "--dataset", type=str,
-        choices=["cryptic_crosswords", "rosetta_stone", "logic_puzzles"]
+        choices=["cryptic_crosswords", "rosetta_stone", "logic_puzzles", "cryptic_crosswords_types", "rosetta_stone_types"]
     )
     parser.add_argument(
         "--model", type=str,
