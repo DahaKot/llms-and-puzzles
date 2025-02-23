@@ -97,10 +97,13 @@ class BaseDataset():
 
         indices = torch.argsort(similarities, descending=True)
 
-        # filter indices by type
-        indices = list(filter(
-            lambda x: x in self.type_dict[example["type"]], indices
-        ))
+        # # filter indices by type
+        device = indices.device
+        valid_indices = torch.tensor(
+            list(self.type_dict[example["type"]]), device=device
+        )
+        mask = torch.isin(indices, valid_indices)
+        indices = indices[mask]
 
         # now we have examples of the same type sorted by semantic similarity
         # if we don't shuffle, examples list will be filled with most similar
@@ -109,7 +112,7 @@ class BaseDataset():
 
         examples = []
         i = 0
-        while len(examples) < self.n_shots:
+        while len(examples) < self.n_shots and i < len(indices):
             index = int(indices[i])
             if not self._too_similar(self.dataset[index], example, examples):
                 examples.append(self.dataset[index])
@@ -259,13 +262,16 @@ class RosettaStone(BaseDataset):
                 train_data, question = prompt_builder.get_data_and_question(
                     data, qna_row=row
                 )
+
                 samples.append({
                     "data": train_data,
                     "question": question,
                     "target": json.dumps([row[2][1]]),
                     "input": train_data + "\n\n" + question,
                     "dataset": "ModeLing",
-                    "language": language
+                    "language": language,
+                    "type": d["type"][0],
+                    "question_number": len(samples)
                 })
 
         return samples
@@ -305,7 +311,9 @@ class RosettaStone(BaseDataset):
                     "target": target_list,
                     "input": train_data + "\n\n" + question,
                     "dataset": "LingOly",
-                    "language": language
+                    "language": language,
+                    "type": None,
+                    "question_number": len(samples)
                 })
 
         return samples
@@ -444,7 +452,7 @@ class LogicPuzzles(BaseDataset):
 
     def _too_similar(self, example1, example2, examples):
         return example1["problem"] == example2["problem"] \
-                or example1 in examples
+                # or example1 in examples
 
     def _map_examples_to_dict(self, examples):
         letter_options = ["A", "B", "C", "D", "E"]
