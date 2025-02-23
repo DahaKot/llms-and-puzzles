@@ -360,7 +360,7 @@ class RosettaStoneTypes(RosettaStone):
         self.dataset = Dataset.from_list(modeling_data)
 
         BaseDataset.__init__(
-            "rosetta_stone", prompt_name, similarity, ranking, n_shots,
+            self, "rosetta_stone", prompt_name, similarity, ranking, n_shots,
             random_seed
         )
 
