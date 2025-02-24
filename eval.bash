@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=logic_puzzles_qwen_semantic # Job name
+#SBATCH --job-name=logic_puzzles_qwen_thematic # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -20,11 +20,32 @@ dataset_name="logic_puzzles"
 batch_size=64
 max_tokens=512
 model="qwen"
+similarity="thematic"
 
-python inference.py --run_name="logic_puzzles_qwen_semantic_bottom_to_top" \
+python inference.py --run_name="logic_pizzles_qwen_thematic_random1" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="semantic" --ranking="semantic_bottom_to_top" --random_seed=5
+    --similarity=$similarity --ranking="random" --random_seed=1024
+
+python inference.py --run_name="logic_puzzles_qwen_thematic_random2" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=512
+
+python inference.py --run_name="logic_puzzles_qwen_thematic_random3" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=64
+
+python inference.py --run_name="logic_puzzles_qwen_thematic_top_to_bottom" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=5
+
+python inference.py --run_name="logic_puzzles_qwen_thematic_bottom_to_top" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=5
 
 
 #python inference.py --run_name="rosetta_stone_mixtral_random_shots2" \
