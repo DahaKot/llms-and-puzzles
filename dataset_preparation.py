@@ -312,7 +312,7 @@ class RosettaStone(BaseDataset):
                     "input": train_data + "\n\n" + question,
                     "dataset": "LingOly",
                     "language": language,
-                    "type": None,
+                    "type": "NONE",
                     "question_number": len(samples)
                 })
 
