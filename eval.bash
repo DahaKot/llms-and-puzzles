@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=logic_puzzles_qwen_thematic # Job name
+#SBATCH --job-name=rosetta_stone_mixtral_icl_test # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -10,58 +10,80 @@
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
 #SBATCH --gres=gpu:1              # Number of GPUs (per node)
-#SBATCH --time=06:00:00             # Specify the time needed for your experiment
+#SBATCH --time=00:20:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
 nvidia-smi
 
-dataset_name="logic_puzzles"
-batch_size=64
+dataset_name="rosetta_stone"
+batch_size=8
 max_tokens=512
-model="qwen"
-similarity="thematic"
+model="mixtral"
+similarity="random"
 
-python inference.py --run_name="logic_pizzles_qwen_thematic_random1" \
+python inference.py --run_name="rosetta_stone_mixtral_random1" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=1024
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=3453
 
-python inference.py --run_name="logic_puzzles_qwen_thematic_random2" \
+python inference.py --run_name="rosetta_stone_mixtral_random2" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=128
+
+python inference.py --run_name="rosetta_stone_mixtral_random3" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=256
+
+python inference.py --run_name="rosetta_stone_mixtral_random4" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="random" --random_seed=512
 
-python inference.py --run_name="logic_puzzles_qwen_thematic_random3" \
+python inference.py --run_name="rosetta_stone_mixtral_random5" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=1024
+
+similarity="semantic"
+python inference.py --run_name="rosetta_stone_mixtral_semantic_random1" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=1024
+
+python inference.py --run_name="rosetta_stone_mixtral_semantic_random2" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="random" --random_seed=64
 
-python inference.py --run_name="logic_puzzles_qwen_thematic_top_to_bottom" \
+python inference.py --run_name="rosetta_stone_mixtral_semantic_random3" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=5
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=32
 
-python inference.py --run_name="logic_puzzles_qwen_thematic_bottom_to_top" \
+python inference.py --run_name="rosetta_stone_mixtral_semantic_random4" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=5
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=16
+
+python inference.py --run_name="rosetta_stone_mixtral_semantic_random5" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=8
+
+python inference.py --run_name="rosetta_stone_mixtral_semantic_top_to_bottom" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=1024
+
+python inference.py --run_name="rosetta_stone_mixtral_semantic_bottom_to_top" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=1024
 
 
-#python inference.py --run_name="rosetta_stone_mixtral_random_shots2" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens
 
-#python inference.py --run_name="rosetta_stone_mixtral_random_shots3" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens
-
-#python inference.py --run_name="rosetta_stone_mixtral_random_shots4" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens
-
-#python inference.py --run_name="rosetta_stone_mixtral_random_shots5" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens
 
 echo " ending " 
