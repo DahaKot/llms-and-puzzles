@@ -83,7 +83,4 @@ python inference.py --run_name="rosetta_stone_mixtral_semantic_bottom_to_top" \
     --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=1024
 
-
-
-
 echo " ending " 

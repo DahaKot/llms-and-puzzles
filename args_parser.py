@@ -19,7 +19,7 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--random_seed", type=int, default=42)
     parser.add_argument(
         "--dataset", type=str,
-        choices=["cryptic_crosswords", "rosetta_stone", "logic_puzzles"]
+        choices=["cryptic_crosswords", "rosetta_stone", "logic_puzzles", "cryptic_crosswords_types", "rosetta_stone_types"]
     )
     parser.add_argument(
         "--model", type=str,
@@ -30,7 +30,7 @@ def add_args(parser: argparse.ArgumentParser):
         choices=["base", "advanced", "zero_shot_chain_of_thought", "5_shot",
                  "base_mixtral_instruct", "advanced_mixtral_instruct",
                  "zero_shot_chain_of_thought_mixtral_instruct",
-                 "5_shot_mixtral_isntruct"]
+                 "5_shot_mixtral_instruct"]
     )
     parser.add_argument(
         "--similarity", type=str, default="random",
