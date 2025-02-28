@@ -335,7 +335,7 @@ class RosettaStone(BaseDataset):
 
     def _too_similar(self, example1, example2, examples):
         return example1["language"] == example2["language"] \
-            or example1["language"] in [ex["language"] for ex in examples]
+            # or example1["language"] in [ex["language"] for ex in examples]
 
     def _map_examples_to_dict(self, examples):
         data = {}

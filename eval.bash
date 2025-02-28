@@ -16,117 +16,51 @@ echo "starting Evaluation......................."
 
 nvidia-smi
 
-<<<<<<< HEAD
-dataset_name="cryptic_crosswords_types"
-batch_size=256
-max_tokens=256
-model="llama"
-similarity="semantic"
+dataset_name="rosetta_stone_types"
+batch_size=8
+max_tokens=512
+model="mixtral"
+similarity="random"
 
-python inference.py --run_name="small_cryptic_crosswords_llama_base" \
+python inference.py --run_name="little_rosetta_stone_mixtral_random1" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="base" --n_gpus=1 --max_tokens=$max_tokens \
-    #--similarity=$similarity --ranking="random" --random_seed=16
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=90265
 
-python inference.py --run_name="small_cryptic_crossword_llama_advanced" \
+python inference.py --run_name="little_rosetta_stone_mixtral_random2" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="advanced" --n_gpus=1 --max_tokens=$max_tokens \
-    #--similarity=$similarity --ranking="random" --random_seed=20
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=1024
 
-python inference.py --run_name="small_cryptic_crosswords_llama_zero_shot_chain_of_thought" \
+python inference.py --run_name="little_rosetta_stone_mixtral_random3" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="zero_shot_chain_of_thought" --n_gpus=1 --max_tokens=$max_tokens \
-    #--similarity=$similarity --ranking="random" --random_seed=2048
-
-
-python inference.py --run_name="small_cryptic_crosswords_llama_semantic_bottom_to_top" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=2048
-
-python inference.py --run_name="small_cryptic_crosswords_llama_semantic_top_to_bottom" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=2048
-
-python inference.py --run_name="small_cryptic_crosswords_llama_semantic_random1" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=2048
-
-python inference.py --run_name="small_cryptic_crosswords_llama_semantic_random2" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="random" --random_seed=512
 
-python inference.py --run_name="small_cryptic_crosswords_llama_semantic_random3" \
+python inference.py --run_name="little_rosetta_stone_mixtral_random4" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=90
+
+python inference.py --run_name="little_rosetta_stone_mixtral_random5" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="random" --random_seed=256
 
-
-python inference.py --run_name="small_cryptic_crosswords_llama_random1" \
+python inference.py --run_name="little_rosetta_stone_mixtral_base" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="random" --ranking="random" --random_seed=2048
+    --prompt_name="base_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    #--similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=256
 
-python inference.py --run_name="small_cryptic_crosswords_llama_random2" \
+python inference.py --run_name="little_rosetta_stone_mixtral_advanced" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="random" --ranking="random" --random_seed=128
+    --prompt_name="advanced_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    #--similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=256
 
-python inference.py --run_name="small_cryptic_crosswords_llama_random3" \
+python inference.py --run_name="little_rosetta_stone_mixtral_zero_shot_chain_of_thought" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="random" --ranking="random" --random_seed=20
+    --prompt_name="zero_shot_chain_of_thought_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    #--similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=256
 
-python inference.py --run_name="small_cryptic_crosswords_llama_random4" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="random" --ranking="random" --random_seed=8
 
-python inference.py --run_name="small_cryptic_crosswords_llama_random5" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity="random" --ranking="random" --random_seed=256
-
-runpodctl stop pod 6xi4x8gjj5cbww
-#dataset_name="rosetta_stone_types"
-#batch_size=8
-#max_tokens=512
-
-#python inference.py --run_name="rosetta_stone_llama_thematic_random1" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
- #   --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-#    --similarity=$similarity --ranking="random" --random_seed=1024
-
-#python inference.py --run_name="rosetta_stone_llama_thematic_random2" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-#    --similarity=$similarity --ranking="random" --random_seed=512
-
-#python inference.py --run_name="rosetta_stone_llama_thematic_random3" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-#    --similarity=$similarity --ranking="random" --random_seed=2048
-
-#python inference.py --run_name="logic_puzzles_llama_semantic_random2" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=1 --max_tokens=$max_tokens \
-#    --similarity="random" --ranking="random" --random_seed=256
-
-#python inference.py --run_name="logic_puzzles_llama_semantic_random3" \
-#    --batch_size=8 --dataset="rosetta_stone" --model=$model \
-#    --prompt_name="5_shot" --n_gpus=1 --max_tokens=512 \
-#    --similarity="random" --ranking="random" --random_seed=1024
-
-#python inference.py --run_name="rosetta_stone_llama_random_shots3" \
-#    --batch_size=8 --dataset="rosetta_stone" --model=$model \
-#    --prompt_name="5_shot" --n_gpus=1 --max_tokens=512 \
-#    --similarity="random" --ranking="random" --random_seed=256
-
-#python inference.py --run_name="cryptic_crosswords_mixtral_random_shots5" \
-#    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-#    --prompt_name="5_shot" --n_gpus=4 --max_tokens=$max_tokens \
-#    --similarity="random" --ranking="random" --random_seed=5
 echo " ending " 
