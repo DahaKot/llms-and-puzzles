@@ -335,7 +335,7 @@ class RosettaStone(BaseDataset):
 
     def _too_similar(self, example1, example2, examples):
         return example1["language"] == example2["language"] \
-            # or example1["language"] in [ex["language"] for ex in examples]
+            or example1["language"] in [ex["language"] for ex in examples]
 
     def _map_examples_to_dict(self, examples):
         data = {}
@@ -378,6 +378,11 @@ class RosettaStoneTypes(RosettaStone):
             load_from_cache_file=False,
             with_indices=True
         )
+
+    def _too_similar(self, example1, example2, examples):
+        # we lift the restriction of not repeating the language in all examples
+        # because there is not enough data
+        return example1["language"] == example2["language"]
 
 
 class LogicPuzzles(BaseDataset):
