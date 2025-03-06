@@ -200,7 +200,7 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
         self.dataset = load_dataset(
-            "csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
+            "csv", data_files="data/cryptic_crosswords/cleaned_dataset_with_solutions.csv"
         )["train"]
         self.embedding_field = "input"
 
@@ -215,6 +215,16 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             load_from_cache_file=False,
             with_indices=True
         )
+
+    def _map_examples_to_dict(self, examples):
+        data = {}
+
+        for i, example in enumerate(examples):
+            data["clue" + str(i + 1)] = example["input"]
+            data["answer" + str(i + 1)] = example["target"]
+            data["solution" + str(i + 1)] = example["solution"]
+
+        return data
 
 
 class RosettaStone(BaseDataset):
