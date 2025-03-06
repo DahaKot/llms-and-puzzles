@@ -9,6 +9,12 @@ Clue:
 Answer:
 Let's think step by step.
 ''',
+"generate_solution": '''You are a cryptic crossword expert. You are given a cryptic crossword clue and its answer. Generate a valid reasoning chain that arrives at the correct answer.
+Clue:
+{clue}
+Answer:
+{answer}
+''',
 "advanced": '''You are a cryptic crossword expert. You are given a cryptic crossword clue.
 A cryptic clue typically consists of a definition and a wordplay. The definition is a synonym of the answer and usually appears at the beginning or the end of the clue. The wordplay provides instructions for deriving the answer in a less literal way. The number(s) in parentheses at the end of the clue indicate the length of the answer.
 Extract the definition and the wordplay from the clue, then use them to solve it. Finally, provide the answer in the format "Answer: ...".
@@ -39,6 +45,46 @@ Answer:
 
 Clue:
 {clue5}
+Answer:
+{answer5}
+
+Clue:
+{clue}
+''',
+"5_shot_solutions": '''You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+Examples:
+Clue:
+{clue1}
+Solution:
+{solution1}
+Answer:
+{answer1}
+
+Clue:
+{clue2}
+Solution:
+{solution2}
+Answer:
+{answer2}
+
+Clue:
+{clue3}
+Solution:
+{solution3}
+Answer:
+{answer3}
+
+Clue:
+{clue4}
+Solution:
+{solution4}
+Answer:
+{answer4}
+
+Clue:
+{clue5}
+Solution:
+{solution5}
 Answer:
 {answer5}
 
@@ -95,6 +141,47 @@ Answer:
 Clue:
 {clue}
 [/INST]
+''',
+"5_shot_solutions_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+Examples:
+Clue:
+{clue1}
+Solution:
+{solution1}
+Answer:
+{answer1}
+
+Clue:
+{clue2}
+Solution:
+{solution2}
+Answer:
+{answer2}
+
+Clue:
+{clue3}
+Solution:
+{solution3}
+Answer:
+{answer3}
+
+Clue:
+{clue4}
+Solution:
+{solution4}
+Answer:
+{answer4}
+
+Clue:
+{clue5}
+Solution:
+{solution5}
+Answer:
+{answer5}
+
+Clue:
+{clue}
+[/INST]
 '''
 }
 
@@ -114,6 +201,15 @@ Sentence to translate:
 {question}
 Answer:
 Let's think step by step.
+''',
+"generate_solution": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. The translation of the last sentence is the answer and it is given to you. Generate a valid reasoning chain that arrives at the correct answer.
+Parallel sentences:
+{data}
+
+Sentence to translate:
+{question}
+Answer:
+{answer}
 ''',
 "advanced": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
 Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
@@ -157,6 +253,59 @@ Parallel sentences:
 {data5}
 Sentence to translate:
 {question5}
+Answer:
+{answer5}
+
+Parallel sentences:
+{data}
+
+Sentence to translate:
+{question}
+''',
+"5_shot_solutions": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+Examples:
+Parallel sentences:
+{data1}
+Sentence to translate:
+{question1}
+Solution:
+{solution1}
+Answer:
+{answer1}
+
+Parallel sentences:
+{data2}
+Sentence to translate:
+{question2}
+Solution:
+{solution2}
+Answer:
+{answer2}
+
+Parallel sentences:
+{data3}
+Sentence to translate:
+{question3}
+Solution:
+{solution3}
+Answer:
+{answer3}
+
+Parallel sentences:
+{data4}
+Sentence to translate:
+{question4}
+Solution:
+{solution4}
+Answer:
+{answer4}
+
+Parallel sentences:
+{data5}
+Sentence to translate:
+{question5}
+Solution:
+{solution5}
 Answer:
 {answer5}
 
@@ -238,6 +387,60 @@ Sentence to translate:
 {question}
 [/INST]
 ''',
+"5_shot_solutions_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+Examples:
+Parallel sentences:
+{data1}
+Sentence to translate:
+{question1}
+Solution:
+{solution1}
+Answer:
+{answer1}
+
+Parallel sentences:
+{data2}
+Sentence to translate:
+{question2}
+Solution:
+{solution2}
+Answer:
+{answer2}
+
+Parallel sentences:
+{data3}
+Sentence to translate:
+{question3}
+Solution:
+{solution3}
+Answer:
+{answer3}
+
+Parallel sentences:
+{data4}
+Sentence to translate:
+{question4}
+Solution:
+{solution4}
+Answer:
+{answer4}
+
+Parallel sentences:
+{data5}
+Sentence to translate:
+{question5}
+Solution:
+{solution5}
+Answer:
+{answer5}
+
+Parallel sentences:
+{data}
+
+Sentence to translate:
+{question}
+[/INST]
+'''
 }
 
 logic_puzzles_prompts = {"base": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".

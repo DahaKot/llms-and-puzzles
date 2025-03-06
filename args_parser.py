@@ -30,7 +30,7 @@ def add_args(parser: argparse.ArgumentParser):
         choices=["base", "advanced", "zero_shot_chain_of_thought", "5_shot",
                  "base_mixtral_instruct", "advanced_mixtral_instruct",
                  "zero_shot_chain_of_thought_mixtral_instruct",
-                 "5_shot_mixtral_instruct"]
+                 "5_shot_mixtral_instruct", "generate_solution"]
     )
     parser.add_argument(
         "--similarity", type=str, default="random",
