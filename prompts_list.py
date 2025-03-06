@@ -51,42 +51,32 @@ Answer:
 Clue:
 {clue}
 ''',
-"5_shot_solutions": '''You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+"5_shot_solutions": '''You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide the answer.
 Examples:
 Clue:
 {clue1}
 Solution:
 {solution1}
-Answer:
-{answer1}
 
 Clue:
 {clue2}
 Solution:
 {solution2}
-Answer:
-{answer2}
 
 Clue:
 {clue3}
 Solution:
 {solution3}
-Answer:
-{answer3}
 
 Clue:
 {clue4}
 Solution:
 {solution4}
-Answer:
-{answer4}
 
 Clue:
 {clue5}
 Solution:
 {solution5}
-Answer:
-{answer5}
 
 Clue:
 {clue}
@@ -142,42 +132,32 @@ Clue:
 {clue}
 [/INST]
 ''',
-"5_shot_solutions_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
+"5_shot_solutions_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide the answer.
 Examples:
 Clue:
 {clue1}
 Solution:
 {solution1}
-Answer:
-{answer1}
 
 Clue:
 {clue2}
 Solution:
 {solution2}
-Answer:
-{answer2}
 
 Clue:
 {clue3}
 Solution:
 {solution3}
-Answer:
-{answer3}
 
 Clue:
 {clue4}
 Solution:
 {solution4}
-Answer:
-{answer4}
 
 Clue:
 {clue5}
 Solution:
 {solution5}
-Answer:
-{answer5}
 
 Clue:
 {clue}
@@ -262,7 +242,7 @@ Parallel sentences:
 Sentence to translate:
 {question}
 ''',
-"5_shot_solutions": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+"5_shot_solutions": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide the answer.
 Examples:
 Parallel sentences:
 {data1}
@@ -270,8 +250,6 @@ Sentence to translate:
 {question1}
 Solution:
 {solution1}
-Answer:
-{answer1}
 
 Parallel sentences:
 {data2}
@@ -279,8 +257,6 @@ Sentence to translate:
 {question2}
 Solution:
 {solution2}
-Answer:
-{answer2}
 
 Parallel sentences:
 {data3}
@@ -288,8 +264,6 @@ Sentence to translate:
 {question3}
 Solution:
 {solution3}
-Answer:
-{answer3}
 
 Parallel sentences:
 {data4}
@@ -297,8 +271,6 @@ Sentence to translate:
 {question4}
 Solution:
 {solution4}
-Answer:
-{answer4}
 
 Parallel sentences:
 {data5}
@@ -306,8 +278,6 @@ Sentence to translate:
 {question5}
 Solution:
 {solution5}
-Answer:
-{answer5}
 
 Parallel sentences:
 {data}
@@ -387,7 +357,7 @@ Sentence to translate:
 {question}
 [/INST]
 ''',
-"5_shot_solutions_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
+"5_shot_solutions_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide the answer.
 Examples:
 Parallel sentences:
 {data1}
@@ -395,8 +365,6 @@ Sentence to translate:
 {question1}
 Solution:
 {solution1}
-Answer:
-{answer1}
 
 Parallel sentences:
 {data2}
@@ -404,8 +372,6 @@ Sentence to translate:
 {question2}
 Solution:
 {solution2}
-Answer:
-{answer2}
 
 Parallel sentences:
 {data3}
@@ -413,8 +379,6 @@ Sentence to translate:
 {question3}
 Solution:
 {solution3}
-Answer:
-{answer3}
 
 Parallel sentences:
 {data4}
@@ -422,8 +386,6 @@ Sentence to translate:
 {question4}
 Solution:
 {solution4}
-Answer:
-{answer4}
 
 Parallel sentences:
 {data5}
@@ -431,8 +393,6 @@ Sentence to translate:
 {question5}
 Solution:
 {solution5}
-Answer:
-{answer5}
 
 Parallel sentences:
 {data}
