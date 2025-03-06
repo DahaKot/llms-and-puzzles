@@ -167,6 +167,10 @@ class CrypticCrosswords(BaseDataset):
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                clue=clue, answer=example["target"]
+            )
         else:
             example["prompt"] = prompt.format(clue=clue)
 
@@ -196,7 +200,8 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
         self.dataset = load_dataset(
-            "csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
+            #"csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
+            "csv", data_files="data/cryptic_crosswords/cleaned_dataset_with_solutions.csv"
         )["train"]
         self.embedding_field = "input"
 
@@ -211,6 +216,16 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             load_from_cache_file=False,
             with_indices=True
         )
+
+    def _map_examples_to_dict(self, examples):
+        data = {}
+
+        for i, example in enumerate(examples):
+            data["clue" + str(i + 1)] = example["input"]
+            data["answer" + str(i + 1)] = example["target"]
+            data["solution" + str(i + 1)] = example["solution"]
+
+        return data
 
 
 class RosettaStone(BaseDataset):
@@ -328,6 +343,11 @@ class RosettaStone(BaseDataset):
             example["prompt"] = prompt.format(
                 data=data, question=question, **few_shot_examples
             )
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                data=data, question=question,
+                answer=json.loads(example["target"])[0]
+            )
         else:
             example["prompt"] = prompt.format(data=data, question=question)
 
@@ -335,7 +355,7 @@ class RosettaStone(BaseDataset):
 
     def _too_similar(self, example1, example2, examples):
         return example1["language"] == example2["language"] \
-            # or example1["language"] in [ex["language"] for ex in examples]
+            or example1["language"] in [ex["language"] for ex in examples]
 
     def _map_examples_to_dict(self, examples):
         data = {}
@@ -378,6 +398,11 @@ class RosettaStoneTypes(RosettaStone):
             load_from_cache_file=False,
             with_indices=True
         )
+
+    def _too_similar(self, example1, example2, examples):
+        # we lift the restriction of not repeating the language in all examples
+        # because there is not enough data
+        return example1["language"] == example2["language"]
 
 
 class LogicPuzzles(BaseDataset):
