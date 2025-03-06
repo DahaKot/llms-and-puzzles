@@ -167,6 +167,10 @@ class CrypticCrosswords(BaseDataset):
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                clue=clue, answer=example["target"]
+            )
         else:
             example["prompt"] = prompt.format(clue=clue)
 
@@ -327,6 +331,11 @@ class RosettaStone(BaseDataset):
             few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(
                 data=data, question=question, **few_shot_examples
+            )
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                data=data, question=question,
+                answer=json.loads(example["target"])[0]
             )
         else:
             example["prompt"] = prompt.format(data=data, question=question)
