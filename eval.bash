@@ -16,71 +16,15 @@ echo "starting Evaluation......................."
 
 nvidia-smi
 
-dataset_name="logic_puzzles"
-batch_size=64
+dataset_name="cryptic_crosswords_types"
+batch_size=256
 max_tokens=512
-model="mixtral"
-similarity="random"
+model="qwen"
+similarity="thematic"
 
-python inference.py --run_name="logic_puzzles_mixtral_random1" \
+python inference.py --run_name="small_cryptic_crosswords_qwen_solutions_thematic_bottom_to_top" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=1024
-
-python inference.py --run_name="logic_puzzles_mixtral_random2" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=256
-
-python inference.py --run_name="logic_puzzles_mixtral_random3" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=512
-
-python inference.py --run_name="logic_puzzles_mixtral_random4" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=64
-
-python inference.py --run_name="logic_puzzles_mixtral_random5" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=32
-
-similarity="semantic"
-python inference.py --run_name="logic_puzzles_mixtral_semantic_random1" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=1024
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_random2" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=256
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_random3" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=512
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_random4" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=64
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_random5" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="random" --random_seed=32
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_top_to_bottom" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_top_to_bottom" --random_seed=32
-
-python inference.py --run_name="logic_puzzles_mixtral_semantic_bottom_to_top" \
-    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
+    --prompt_name="5_shot_solutions" --n_gpus=1 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=32
 
 echo " ending " 
