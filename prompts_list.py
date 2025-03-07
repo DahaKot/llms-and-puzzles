@@ -131,8 +131,6 @@ Answer:
 Clue:
 {clue}
 [/INST]
-<<<<<<< HEAD
-=======
 ''',
 "5_shot_solutions_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide the answer.
 Examples:
@@ -164,7 +162,6 @@ Solution:
 Clue:
 {clue}
 [/INST]
->>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 '''
 }
 
@@ -421,6 +418,14 @@ Possible answers:
 Answer:
 Let's think step by step.
 ''',
+"generate_solution": '''You are a logic expert. You are given a logic puzzle along with several answer options. The correct answer is given to you. Generate a valid reasoning chain that arrives at the correct answer.
+Puzzle:
+{problem}
+Possible answers:
+{options}
+Answer:
+{answer}
+''',
 "advanced": '''You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
 Solve the puzzle. Finally, provide the letter of the correct option in the format: "answer: <option letter>".
 Puzzle:
@@ -464,6 +469,48 @@ Possible answers:
 {options5}
 Answer:
 {answer5}
+
+Puzzle:
+{problem}
+Possible answers:
+{options}
+''',
+"5_shot_solutions": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
+Examples:
+Puzzle:
+{problem1}
+Possible answers:
+{options1}
+Solution:
+{solution1}
+
+Puzzle:
+{problem2}
+Possible answers:
+{options2}
+Solution:
+{solution2}
+
+Puzzle:
+{problem3}
+Possible answers:
+{options3}
+Solution:
+{solution3}
+
+Puzzle:
+{problem4}
+Possible answers:
+{options4}
+Solution:
+{solution4}
+
+Puzzle:
+{problem5}
+Possible answers:
+{options5}
+Solution:
+{solution5}
 
 Puzzle:
 {problem}
@@ -530,6 +577,49 @@ Possible answers:
 {options5}
 Answer:
 {answer5}
+
+Puzzle:
+{problem}
+Possible answers:
+{options}
+[/INST]
+''',
+"5_shot_solutions": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
+Examples:
+Puzzle:
+{problem1}
+Possible answers:
+{options1}
+Solution:
+{solution1}
+
+Puzzle:
+{problem2}
+Possible answers:
+{options2}
+Solution:
+{solution2}
+
+Puzzle:
+{problem3}
+Possible answers:
+{options3}
+Solution:
+{solution3}
+
+Puzzle:
+{problem4}
+Possible answers:
+{options4}
+Solution:
+{solution4}
+
+Puzzle:
+{problem5}
+Possible answers:
+{options5}
+Solution:
+{solution5}
 
 Puzzle:
 {problem}
