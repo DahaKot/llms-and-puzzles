@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=rosetta_stone_mixtral_icl # Job name
+#SBATCH --job-name=rosetta_stone_mixtral_icl_test # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
