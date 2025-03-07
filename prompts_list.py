@@ -51,8 +51,6 @@ Answer:
 Clue:
 {clue}
 ''',
-<<<<<<< HEAD
-=======
 "5_shot_solutions": '''You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide the answer.
 Examples:
 Clue:
@@ -83,7 +81,6 @@ Solution:
 Clue:
 {clue}
 ''',
->>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 "base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
 Clue:
 {clue}
@@ -188,8 +185,6 @@ Sentence to translate:
 Answer:
 Let's think step by step.
 ''',
-<<<<<<< HEAD
-=======
 "generate_solution": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. The translation of the last sentence is the answer and it is given to you. Generate a valid reasoning chain that arrives at the correct answer.
 Parallel sentences:
 {data}
@@ -199,7 +194,6 @@ Sentence to translate:
 Answer:
 {answer}
 ''',
->>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 "advanced": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Rosetta Stone puzzles require the solver to map vocabulary from one language to another and identify patterns in word order, affixes, and other linguistic features.
 Analyze how the language works and apply the deduced rules to translate the new sentence. Finally, provide the answer in the format "Answer: ...".
 Parallel sentences:
@@ -251,8 +245,6 @@ Parallel sentences:
 Sentence to translate:
 {question}
 ''',
-<<<<<<< HEAD
-=======
 "5_shot_solutions": '''You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide the answer.
 Examples:
 Parallel sentences:
@@ -296,7 +288,6 @@ Parallel sentences:
 Sentence to translate:
 {question}
 ''',
->>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 "base_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
 Parallel sentences:
 {data}
@@ -369,8 +360,6 @@ Sentence to translate:
 {question}
 [/INST]
 ''',
-<<<<<<< HEAD
-=======
 "5_shot_solutions_mixtral_instruct": '''[INST] You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide the answer.
 Examples:
 Parallel sentences:
@@ -415,7 +404,6 @@ Sentence to translate:
 {question}
 [/INST]
 '''
->>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 }
 
 logic_puzzles_prompts = {"base": '''You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
