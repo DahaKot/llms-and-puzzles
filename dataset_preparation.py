@@ -201,6 +201,7 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
         self.dataset = load_dataset(
+            #"csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
             "csv", data_files="data/cryptic_crosswords/cleaned_dataset_with_solutions.csv"
         )["train"]
         self.embedding_field = "input"

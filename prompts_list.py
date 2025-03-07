@@ -131,6 +131,8 @@ Answer:
 Clue:
 {clue}
 [/INST]
+<<<<<<< HEAD
+=======
 ''',
 "5_shot_solutions_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide the answer.
 Examples:
@@ -162,6 +164,7 @@ Solution:
 Clue:
 {clue}
 [/INST]
+>>>>>>> d59284ba2c0304f76cb2721704f9961b19c0b8b9
 '''
 }
 
