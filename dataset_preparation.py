@@ -7,6 +7,7 @@ import re
 from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity  # type: ignore
 import torch
+import csv
 
 
 class BaseDataset():
@@ -268,6 +269,13 @@ class RosettaStone(BaseDataset):
         prompt_builder = PromptBuilder(self.prompt_name)
         samples = []
 
+        with open(
+                './data/rosetta_stone/cleaned_dataset_with_solutions.csv',
+                mode='r', newline='', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            solutions_data = list(reader)
+
+        solutions_index = 1
         for d in dataset:
             data = d["cleaned_data"]["data"]
             qna = d["cleaned_data"]["qna"]
@@ -285,8 +293,10 @@ class RosettaStone(BaseDataset):
                     "dataset": "ModeLing",
                     "language": language,
                     "type": d["type"][0],
-                    "question_number": len(samples)
+                    "question_number": len(samples),
+                    "solution": solutions_data[solutions_index][3]
                 })
+                solutions_index += 1
 
         return samples
 
@@ -327,7 +337,8 @@ class RosettaStone(BaseDataset):
                     "dataset": "LingOly",
                     "language": language,
                     "type": "NONE",
-                    "question_number": len(samples)
+                    "question_number": len(samples),
+                    "solution": "",
                 })
 
         return samples
@@ -402,6 +413,17 @@ class RosettaStoneTypes(RosettaStone):
         # we lift the restriction of not repeating the language in all examples
         # because there is not enough data
         return example1["language"] == example2["language"]
+    
+    def _map_examples_to_dict(self, examples):
+        data = {}
+        for i, sample in enumerate(examples):
+            data["data" + str(i + 1)] = sample["data"]
+            data["question" + str(i + 1)] = sample["question"]
+            one_correct_answer = json.loads(sample["target"])[0]
+            data["answer" + str(i + 1)] = one_correct_answer
+            data["solution" + str(i + 1)] = sample["solution"]
+
+        return data
 
 
 class LogicPuzzles(BaseDataset):
