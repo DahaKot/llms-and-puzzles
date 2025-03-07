@@ -201,8 +201,9 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
         self.dataset = load_dataset(
-            #"csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
-            "csv", data_files="data/cryptic_crosswords/cleaned_dataset_with_solutions.csv"
+            # "csv", data_files="data/cryptic_crosswords/extended_dataset.csv"
+            "csv", data_files="data/cryptic_crosswords/"
+                              + "cleaned_dataset_with_solutions.csv"
         )["train"]
         self.embedding_field = "input"
 
@@ -414,7 +415,7 @@ class RosettaStoneTypes(RosettaStone):
         # we lift the restriction of not repeating the language in all examples
         # because there is not enough data
         return example1["language"] == example2["language"]
-    
+
     def _map_examples_to_dict(self, examples):
         data = {}
         for i, sample in enumerate(examples):
