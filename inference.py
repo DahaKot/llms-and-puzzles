@@ -21,8 +21,8 @@ if __name__ == "__main__":
     model = LLM(
         model=models_dict[args.model],
         dtype="float16",
-        max_model_len=4098,
-        gpu_memory_utilization=0.8,
+        max_model_len=8000,
+        gpu_memory_utilization=0.9,
         tensor_parallel_size=args.n_gpus
     )
     tokenizer = model.get_tokenizer()
