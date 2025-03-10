@@ -482,19 +482,24 @@ class LogicPuzzles(BaseDataset):
             example
         )
 
+        letter_options = ["A", "B", "C", "D", "E"]
+        example["target"] = letter_options[example["answer"] - 1]
+
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
             example["prompt"] = prompt.format(
                 problem=problem,
                 options=example["possible_answers_string"], **few_shot_examples
             )
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                problem=problem, options=example["possible_answers_string"],
+                answer=example["target"]
+            )
         else:
             example["prompt"] = prompt.format(
                 problem=problem, options=example["possible_answers_string"]
             )
-
-        letter_options = ["A", "B", "C", "D", "E"]
-        example["target"] = letter_options[example["answer"] - 1]
 
         return example
 
