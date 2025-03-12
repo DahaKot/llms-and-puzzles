@@ -250,6 +250,8 @@ Sentence to translate:
 {question1}
 Solution:
 {solution1}
+Answer:
+{answer1}
 
 Parallel sentences:
 {data2}
@@ -257,6 +259,8 @@ Sentence to translate:
 {question2}
 Solution:
 {solution2}
+Answer:
+{answer2}
 
 Parallel sentences:
 {data3}
@@ -264,6 +268,8 @@ Sentence to translate:
 {question3}
 Solution:
 {solution3}
+Answer:
+{answer3}
 
 Parallel sentences:
 {data4}
@@ -271,6 +277,8 @@ Sentence to translate:
 {question4}
 Solution:
 {solution4}
+Answer:
+{answer4}
 
 Parallel sentences:
 {data5}
@@ -278,6 +286,8 @@ Sentence to translate:
 {question5}
 Solution:
 {solution5}
+Answer:
+{answer5}
 
 Parallel sentences:
 {data}
