@@ -441,6 +441,10 @@ class LogicPuzzles(BaseDataset):
         )
         self.embedding_field = "problem"
 
+        solutions_dataset = pd.read_csv("./data/puzzle_ben/dataset_with_solutions.csv")
+        solutions_column = solutions_dataset["solution"]
+        self.dataset["solution"] = solutions_column
+
         super().__init__(
             "logic_puzzles", prompt_name, similarity, ranking, n_shots,
             random_seed
