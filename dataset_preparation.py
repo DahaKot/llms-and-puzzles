@@ -522,6 +522,7 @@ class LogicPuzzles(BaseDataset):
             data["options" + str(i + 1)] = self._generate_options_string(
                 sample
             )
+            data["solution" + str(i + 1)] = sample["solution"]
 
         return data
 
