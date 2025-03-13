@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity  # type: ignore
 import torch
 import csv
+import pandas as pd
 
 
 class BaseDataset():
@@ -442,8 +443,8 @@ class LogicPuzzles(BaseDataset):
         self.embedding_field = "problem"
 
         solutions_dataset = pd.read_csv("./data/puzzle_ben/dataset_with_solutions.csv")
-        solutions_column = solutions_dataset["solution"]
-        self.dataset["solution"] = solutions_column
+        solutions_column = solutions_dataset["solution"].to_list()
+        self.dataset = self.dataset.add_column("solution", solutions_column)
 
         super().__init__(
             "logic_puzzles", prompt_name, similarity, ranking, n_shots,
