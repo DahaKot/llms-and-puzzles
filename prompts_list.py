@@ -81,6 +81,83 @@ Solution:
 Clue:
 {clue}
 ''',
+"deepseek_advanced": '''Analyze the cryptic clue by following these steps:  
+1. **Identify Components**: Split the clue into its *definition* (usually at the start or end) and *wordplay* (the cryptic element).  
+2. **Check for Common Cryptic Types**:  
+   - **Anagram**: Look for words like *mixed, chaotic, broken*. Rearrange letters.  
+   - **Charade**: Combine parts of words (e.g., *‘fish’ + ‘ing’ = ‘fishing’*).  
+   - **Hidden Word**: Find a word concealed within the clue (e.g., *‘part of *castle*’ = ‘cast’*).  
+   - **Reversal**: Words like *back, returning* hint at reversing letters (e.g., *‘flow’ reversed = ‘wolf’*).  
+   - **Homophone**: Words like *heard, sounds like* indicate similar-sounding words.  
+   - **Container/Insertion**: Words like *holding, inside* suggest inserting letters (e.g., *‘anger’ holding ‘v’ = ‘vanger’*).  
+   - **Deletion**: Words like *losing, without* signal removing letters.  
+3. **Parse Abbreviations/Symbols**: Convert parts of the clue into abbreviations (e.g., *‘queen’ = Q, ‘heart’ = ♥ = ‘art’*).  
+4. **Double Definitions**: Check if the clue offers two distinct meanings for the answer.  
+5. **Verify Answer**: Ensure the solution matches both the definition and wordplay, and fits the required letter count (if provided).  
+
+**Clue:**
+{clue}
+**Final Output**: Clearly state the answer and explain how each component (definition + wordplay) leads to it.
+''',
+"deepseek_anagram": '''To solve this cryptic anagram clue, follow these steps:  
+1. **Identify the definition**: This is the part of the clue that directly describes the answer (often at the start or end).  
+2. **Locate the anagram indicator**: Look for words suggesting rearrangement, such as "change," "breaking," "shocking," "ridiculous," or "awkward."  
+3. **Extract the letters**: Take the remaining words (excluding the definition and indicator) and combine their letters. Ignore punctuation and spaces.  
+4. **Rearrange the letters**: Form a word or phrase that matches the definition and has the specified letter count (provided in parentheses).  
+
+**Clue:**
+{clue}
+**Answer:**
+''',
+"deepseek_assemblage": '''To solve this cryptic *assemblage* clue, follow these steps:  
+1. **Identify the definition**: This directly defines the answer, typically at the start or end of the clue.  
+2. **Locate wordplay components**: Look for:  
+   - **Extractions** (e.g., “fourth of X” = the 4th letter of X, “beginning” = first letter).  
+   - **Synonyms** (e.g., “transport” = *vehicle*).  
+   - **Abbreviations** (e.g., “prize” = *E* for “excellence”).  
+   - **Hidden words** or letters at intervals (e.g., “at regular intervals” = every other letter).  
+   - **Reversals** (e.g., “returning” = reverse a substring).  
+3. **Break down each component**: Extract letters, substitute synonyms, apply abbreviations, or reverse segments as indicated.  
+4. **Assemble the parts**: Combine the elements to form the answer, ensuring the total length matches the number in parentheses.  
+
+**Clue:**
+{clue}
+**Answer:**
+''',
+"deepseek_container": '''To solve this cryptic *container* clue, follow these steps: 
+1. **Identify the definition**: Determine the part of the clue that directly defines the answer, usually positioned at the beginning or end.  
+2. **Spot insertion indicators**: Look for words or phrases like "in," "around," "holding," "encased," or "invested in," which signal that one substring (*contained*) is nested inside another (*container*).  
+3. **Break down components**:  
+   - **Container**: Identify the outer substring (often a synonym, abbreviation, or truncated word).  
+   - **Contained**: Locate the inner substring to be inserted (check for synonyms, abbreviations, or wordplay like reversals).  
+4. **Assemble**: Insert the *contained* substring into the *container*, ensuring proper letter order.  
+5. **Verify length**: Confirm the total letters match the number in parentheses.  
+
+**Clue:**
+{clue}
+**Answer:**
+''',
+"deepseek_double_definition": '''To solve a cryptic double definition clue, follow these steps:  
+
+1. **Identify the two definitions**: Split the clue into segments that represent *two distinct meanings* of the same word.  
+2. **Consider homonyms and polysemes**: Look for a word with separate definitions (e.g., differing parts of speech, alternate pronunciations, or unrelated meanings).  
+3. **Match the letter count**: Ensure the answer aligns with the specified length (provided in parentheses).  
+4. **Verify mutual fit**: Confirm the word logically satisfies *both* definitions without relying on wordplay (e.g., anagrams or hidden words).  
+
+**Clue:**
+{clue}
+**Answer:**
+''',
+"deepseek_double_hidden_word": '''To solve this cryptic *hidden word* clue, follow these steps:  
+1. **Identify the definition**: This directly defines the answer, often positioned at the start or end of the clue.  
+2. **Locate hidden indicators**: Look for terms like “kept by,” “from,” “in,” “offering,” or “contained in” that signal letters are embedded within adjacent words.  
+3. **Analyze the text as a continuous string**: Ignore spaces and punctuation. Search for a consecutive sequence of letters matching the specified length (in parentheses), which may span multiple words.  
+4. **Confirm the answer**: Ensure the extracted letters align with the definition and length requirement.  
+
+**Clue:**
+{clue}
+**Answer:**
+''',
 "base_mixtral_instruct": '''[INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.
 Clue:
 {clue}
