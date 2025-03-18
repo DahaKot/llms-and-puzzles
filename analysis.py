@@ -1,9 +1,10 @@
-import matplotlib.pyplot as plt
-from collections import Counter
-import pandas as pd  # type: ignore
-import numpy as np
-from scipy import stats  # type: ignore
 import os
+from collections import Counter
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd  # type: ignore
+from scipy import stats  # type: ignore
 
 
 def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
@@ -80,7 +81,6 @@ def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
     return correctly_solved
 
 
-# Function to create and analyze the performance matrix
 def analyze_prompt_performance(results_df):
     """
     Analyze how different prompts perform across problems
@@ -125,29 +125,25 @@ def analyze_prompt_performance(results_df):
             # Containment: how much of prompt1 is contained in prompt2
             prompt1_successes = np.sum(prompt1_results == 1)
             containment_matrix[i, j] = \
-                overlap_matrix[i, j] \
-                / prompt1_successes if prompt1_successes > 0 else 0
+                overlap_matrix[i, j] / prompt1_successes \
+                if prompt1_successes > 0 else 0
 
             # Sign test calculation
             # We're interested in cases where the prompts disagreed
             pos = np.sum((prompt1_results == 1) & (prompt2_results == 0))
             neg = np.sum((prompt1_results == 0) & (prompt2_results == 1))
-
             # For the diagonal, set p-value to 1 (same prompt)
             if i == j:
                 p_value_matrix[i, j] = 1.0
             else:
-                # Sign test (binomial test for the number of positives out of
-                # total disagreements)
                 total = pos + neg
                 if total > 0:
                     # Calculate p-value for two-sided sign test
-                    p_value = stats.binomtest(
+                    bin_test_result = stats.binomtest(
                         pos, n=total, p=0.5, alternative='two-sided'
-                    ).pvalue
-                    p_value_matrix[i, j] = p_value
+                    )
+                    p_value_matrix[i, j] = bin_test_result.pvalue
 
-                    # Store sign test statistic
                     if pos > neg:
                         sign_test_matrix[i, j] = pos / total
                     else:
@@ -187,7 +183,6 @@ def analyze_prompt_performance(results_df):
     }
 
 
-# Function to visualize the analysis results
 def visualize_prompt_performance(results_df, analysis_results, log_path):
     """
     Create visualizations of prompt performance analysis
@@ -201,12 +196,12 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     num_prompts = len(prompt_ids)
 
     # Create a figure
-    fig = plt.figure(figsize=(30, 30))
-    plt.rcParams.update({'font.size': 15})
+    fig = plt.figure(figsize=(20, 20))
+    plt.rcParams.update({'font.size': 10})
 
     # Create a custom colormap for significance levels
-    # Colors for different significance thresholds: >0.05 (not significant),
-    # ≤0.05, ≤0.01, ≤0.001
+    # Colors for different significance thresholds
+    # >0.05 (not significant), ≤0.05, ≤0.01, ≤0.001
     # White, Light blue, Medium blue, Navy
     colors = ['#FFFFFF', '#ADD8E6', '#4682B4', '#000080']
 
@@ -214,32 +209,48 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     p_values = analysis_results["p_value_matrix"]
     sign_values = analysis_results["sign_test_matrix"]
 
-    # Create annotation text matrix with both sign test value and stars
     annot_matrix = np.empty_like(sign_values, dtype=object)
+
+    # Calculate Bonferroni correction
+    num_comparisons = num_prompts * (num_prompts - 1) // 2
+    bonferroni_alpha_001 = 0.001 / num_comparisons
+    bonferroni_alpha_01 = 0.01 / num_comparisons
+    bonferroni_alpha_05 = 0.05 / num_comparisons
+
     for i in range(num_prompts):
         for j in range(num_prompts):
             pval = p_values[i, j]
             sign_val = sign_values[i, j]
 
             # Add stars for significance
-            if pval <= 0.001:
-                stars = "***"
+            if pval <= bonferroni_alpha_001:
+                stars = "***†"  # Significant even with Bonferroni correction
+            elif pval <= bonferroni_alpha_01:
+                stars = "**†"   # Significant even with Bonferroni correction
+            elif pval <= bonferroni_alpha_05:
+                stars = "*†"    # Significant even with Bonferroni correction
+            elif pval <= 0.001:
+                stars = "***"   # Significant without correction
             elif pval <= 0.01:
-                stars = "**"
+                stars = "**"    # Significant without correction
             elif pval <= 0.05:
-                stars = "*"
+                stars = "*"     # Significant without correction
             else:
-                stars = ""
+                stars = ""      # Not significant
 
             # Format as percent with sign
             if i == j:
                 # Diagonal case - no significance test
                 annot_matrix[i, j] = "—"
             else:
+                # if sign_val >= 0:
+                #     formatted_value = f"+{sign_val:.2f}{stars}"
+                # else:
+                #     formatted_value = f"{sign_val:.2f}{stars}"
                 if sign_val >= 0:
-                    formatted_value = f"+{sign_val:.2f}{stars}"
+                    formatted_value = f"+{pval:.2f}{stars}"
                 else:
-                    formatted_value = f"{sign_val:.2f}{stars}"
+                    formatted_value = f"{pval:.2f}{stars}"
                 annot_matrix[i, j] = formatted_value
 
     # Create color matrix based on p-values
@@ -268,9 +279,10 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     # Add annotations
     for i in range(num_prompts):
         for j in range(num_prompts):
-            text = ax.text(
+            _ = ax.text(
                 j, i, annot_matrix[i, j], ha="center", va="center",
-                color="black" if color_matrix[i, j] <= 1 else "white"
+                color="black" if color_matrix[i, j] <= 1 else "white",
+                fontsize=10
             )
 
     # Set tick labels
@@ -298,14 +310,29 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     ax.set_ylabel("Prompt A")
 
     # Add an explanation text box
-    textstr = 'Positive value: Prompt A outperforms Prompt B\n' \
-        + "Negative value: Prompt B outperforms Prompt A\n" \
-        + "Value represents proportion of disagreements\n" \
-        + '* p≤0.05, ** p≤0.01, *** p≤0.001'
-    
+    # Add an explanation text box
+    textstr = '''Positive value: Prompt A outperforms Prompt B' \
+        'Negative value: Prompt B outperforms Prompt A' \
+        'Value represents proportion of disagreements' \
+        '* p≤0.05, ** p≤0.01, *** p≤0.001' \
+        '† Significant after Bonferroni correction'''
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(0.5, -0.15, textstr, transform=ax.transAxes, fontsize=10,
+    ax.text(0.5, -0.15, textstr, transform=ax.transAxes, fontsize=12,
             verticalalignment='top', bbox=props, horizontalalignment='center')
+
+    # Set font sizes for different elements
+    plt.rcParams.update({'font.size': 10})  # Set base font size globally
+
+    # Adjust specific element font sizes
+    ax.set_title("Sign Test Results Between Prompts", fontsize=14)
+    ax.set_xlabel("Prompt B", fontsize=12)
+    ax.set_ylabel("Prompt A", fontsize=12)
+
+    # Adjust tick label font sizes
+    ax.tick_params(axis='both', which='major', labelsize=10)
+
+    # Adjust colorbar label font size
+    cbar.ax.tick_params(labelsize=10)
 
     plt.tight_layout()
     plt.savefig(log_path + "_sign_test_heatmap.pdf")
@@ -334,8 +361,71 @@ def generate_performance_report(results_df, analysis_results):
     # Overview statistics
     report.append("## Overview Statistics")
     report.append(f"- Total problems in dataset: {num_problems}")
-    report.append(f"- Problems solved by at least one prompt: {analysis_results['solved_by_any']} ({analysis_results['solved_by_any']/num_problems:.1%})")
-    report.append(f"- Problems not solved by any prompt: {analysis_results['solved_by_none']} ({analysis_results['solved_by_none']/num_problems:.1%})")
+    report.append("- Problems solved by at least one prompt: "
+                  + f"{analysis_results['solved_by_any']} "
+                  + f"({analysis_results['solved_by_any']/num_problems:.1%})")
+    report.append("- Problems not solved by any prompt: "
+                  + f"{analysis_results['solved_by_none']} "
+                  + f"({analysis_results['solved_by_none']/num_problems:.1%})")
+    report.append("")
+
+    # Find prompts that are significantly better than all others
+    # (with Bonferroni correction)
+    report.append("## Dominant Prompts")
+    p_values = analysis_results["p_value_matrix"]
+    sign_values = analysis_results["sign_test_matrix"]
+
+    # Calculate Bonferroni correction factor
+    num_prompts = len(prompt_ids)
+    num_comparisons = num_prompts * (num_prompts - 1) // 2
+    bonferroni_alpha = 0.05 / num_comparisons
+
+    report.append("Using Bonferroni correction for multiple testing "
+                  + f"(adjusted α = {bonferroni_alpha:.6f}):")
+
+    for i, prompt in enumerate(prompt_ids):
+        # Check if this prompt is significantly better than all others
+        is_dominant = True
+        dominates = []
+        dominates_bonferroni = []
+
+        for j, other_prompt in enumerate(prompt_ids):
+            if i != j:  # Skip comparison with self
+                # Check if prompt i is significantly better than prompt j
+                if sign_values[i, j] > 0 and p_values[i, j] <= 0.05:
+                    dominates.append(other_prompt)
+                    # Also check with Bonferroni correction
+                    if p_values[i, j] <= bonferroni_alpha:
+                        dominates_bonferroni.append(other_prompt)
+                else:
+                    is_dominant = False
+
+        if is_dominant and dominates:
+            report.append(f"- **{prompt}** is statistically significantly"
+                          + " better than ALL other prompts"
+                          + "(uncorrected p ≤ 0.05)")
+            if len(dominates_bonferroni) == len(prompt_ids) - 1:
+                report.append("  - This result holds even after Bonferroni"
+                              + "correction")
+            elif dominates_bonferroni:
+                report.append("  - After Bonferroni correction, it is still"
+                              + "significantly better than: "
+                              + f"{', '.join(dominates_bonferroni)}")
+            else:
+                report.append("  - However, no comparisons remain significant"
+                              + "after Bonferroni correction")
+        elif dominates:
+            report.append(f"- **{prompt}** is statistically significantly"
+                          + "better than the following prompts"
+                          + f"(uncorrected p ≤ 0.05): {', '.join(dominates)}")
+            if dominates_bonferroni:
+                report.append("  - After Bonferroni correction, it is still"
+                              + "significantly better than:"
+                              + f"{', '.join(dominates_bonferroni)}")
+            else:
+                report.append("  - However, no comparisons remain significant"
+                              + "after Bonferroni correction")
+
     report.append("")
 
     # Performance by prompt
@@ -351,7 +441,8 @@ def generate_performance_report(results_df, analysis_results):
     report.append("## Unique Problems Solved by Each Prompt")
     for prompt in prompt_ids:
         unique = analysis_results["unique_problems"][prompt]
-        report.append(f"- {prompt}: {len(unique)} unique problems ({len(unique)/num_problems:.1%})")
+        report.append(f"- {prompt}: {len(unique)} unique problems"
+                      + f"({len(unique) / num_problems:.1%})")
         if len(unique) <= 5:  # List them if there are only a few
             if len(unique) > 0:
                 report.append(
@@ -392,39 +483,44 @@ def generate_performance_report(results_df, analysis_results):
                     significance = "(p > 0.05, not statistically significant)"
 
                 report.append(f"- Sign test: {direction}, {significance}")
-                report.append(f"- Sign test value: {abs(sign_val):.2f} ({abs(sign_val)*100:.1f}% of disagreements)")
-                report.append(f"- {prompt1} contained in {prompt2}: {contain1in2:.2f}")
-                report.append(f"- {prompt2} contained in {prompt1}: {contain2in1:.2f}")
+                report.append(f"- Sign test value: {abs(sign_val):.2f}"
+                              + f"({abs(sign_val)*100:.1f}% of disagreements)")
+                report.append(f"- {prompt1} contained in {prompt2}:"
+                              + f"{contain1in2:.2f}")
+                report.append(f"- {prompt2} contained in {prompt1}:"
+                              + f"{contain2in1:.2f}")
 
                 # Interpret the relationship
                 if contain1in2 > 0.9:
-                    report.append(f"- Almost all problems solved by {prompt1} are also solved by {prompt2}")
+                    report.append(f"- Almost all problems solved by {prompt1}"
+                                  + f"are also solved by {prompt2}")
                 elif contain1in2 > 0.7:
-                    report.append(f"- Most problems solved by {prompt1} are also solved by {prompt2}")
+                    report.append(f"- Most problems solved by {prompt1} are"
+                                  + f"also solved by {prompt2}")
 
                 if contain2in1 > 0.9:
-                    report.append(f"- Almost all problems solved by {prompt2} are also solved by {prompt1}")
+                    report.append(f"- Almost all problems solved by {prompt2}"
+                                  + f"are also solved by {prompt1}")
                 elif contain2in1 > 0.7:
-                    report.append(f"- Most problems solved by {prompt2} are also solved by {prompt1}")
+                    report.append(f"- Most problems solved by {prompt2} are"
+                                  + f"also solved by {prompt1}")
 
                 if contain1in2 < 0.3 and contain2in1 < 0.3:
-                    report.append(f"- {prompt1} and {prompt2} solve largely different sets of problems")
+                    report.append(f"- {prompt1} and {prompt2} solve largely"
+                                  + "different sets of problems")
 
                 report.append("")
 
     return "\n".join(report)
 
 
-# Run the complete analysis on sample data
 def run_complete_analysis(results_df, log_path):
     """Run the complete analysis with visualizations and report"""
-    # Run analysis
+
     analysis_results = analyze_prompt_performance(results_df)
 
-    # Generate visualizations
     fig = visualize_prompt_performance(results_df, analysis_results, log_path)
 
-    # Generate report
     report = generate_performance_report(results_df, analysis_results)
 
     return {
@@ -483,37 +579,58 @@ def analyze_prompt_effectiveness(
     Main entry point for analyzing prompt effectiveness
 
     Parameters:
-    df: Either a DataFrame or dictionary mapping {problem_id: {prompt_id: 1 or 0}}
+    df: Either a DataFrame or dictionary mapping
+        {problem_id: {prompt_id: 1 or 0}}
     problem_ids: List of problem IDs (optional if df provided)
     prompt_ids: List of prompt IDs (optional if df provided)
 
     Returns:
     Complete analysis results
     # """
-    # directory = "./logs/little_rosetta_stone"  # Replace with your directory path
+    # directory = "./logs/little_rosetta_stone"
     df = process_files(directory, model)
 
     # Optionally, save the DataFrame to a CSV file
     df.to_csv(log_path + ".csv", index=False)
     new_order = [
-        "llama_base.txt", "llama_advanced.txt", "llama_zero_shot_chain_of_thought.txt",
-        "llama_random1.txt", "llama_random2.txt", "llama_random3.txt", "llama_random4.txt", "llama_random5.txt",
-        "llama_semantic_random1.txt", "llama_semantic_random2.txt", "llama_semantic_random3.txt", "llama_semantic_random4.txt", "llama_semantic_random5.txt", 
+        "llama_base.txt", "llama_advanced.txt",
+        "llama_zero_shot_chain_of_thought.txt",
+        "llama_random1.txt", "llama_random2.txt", "llama_random3.txt",
+        "llama_random4.txt", "llama_random5.txt",
+        "llama_semantic_random1.txt", "llama_semantic_random2.txt",
+        "llama_semantic_random3.txt", "llama_semantic_random4.txt",
+        "llama_semantic_random5.txt",
         "llama_semantic_top_to_bottom.txt", "llama_semantic_bottom_to_top.txt",
-        "llama_thematic_random1.txt", "llama_thematic_random2.txt", "llama_thematic_random3.txt", "llama_thematic_random4.txt", "llama_thematic_random5.txt", 
+        "llama_thematic_random1.txt", "llama_thematic_random2.txt",
+        "llama_thematic_random3.txt", "llama_thematic_random4.txt",
+        "llama_thematic_random5.txt",
         "llama_thematic_top_to_bottom.txt", "llama_thematic_bottom_to_top.txt",
-        # "qwen_base.txt", "qwen_advanced.txt", "qwen_zero_shot_chain_of_thought.txt",
-        # "qwen_random1.txt", "qwen_random2.txt", "qwen_random3.txt", "qwen_random4.txt", "qwen_random5.txt",
-        # "qwen_semantic_random1.txt", "qwen_semantic_random2.txt", "qwen_semantic_random3.txt", "qwen_semantic_random4.txt", "qwen_semantic_random5.txt", 
-        # "qwen_semantic_top_to_bottom.txt", "qwen_semantic_bottom_to_top.txt",
-        # "qwen_thematic_random1.txt", "qwen_thematic_random2.txt", "qwen_thematic_random3.txt", "qwen_thematic_random4.txt", "qwen_thematic_random5.txt", 
-        # "qwen_thematic_top_to_bottom.txt", "qwen_thematic_bottom_to_top.txt", 
-        # "mixtral_base.txt", "mixtral_advanced.txt", "mixtral_zero_shot_chain_of_thought.txt",
-        # "mixtral_random1.txt", "mixtral_random2.txt", "mixtral_random3.txt", "mixtral_random4.txt", "mixtral_random5.txt",
-        # "mixtral_semantic_random1.txt", "mixtral_semantic_random2.txt", "mixtral_semantic_random3.txt", "mixtral_semantic_random4.txt", "mixtral_semantic_random5.txt", 
-        # "mixtral_semantic_top_to_bottom.txt", "mixtral_semantic_bottom_to_top.txt",
-        # "mixtral_thematic_random1.txt", "mixtral_thematic_random2.txt", "mixtral_thematic_random3.txt", "mixtral_thematic_random4.txt", "mixtral_thematic_random5.txt",
-        # "mixtral_thematic_top_to_bottom.txt", "mixtral_thematic_bottom_to_top.txt", 
+        "qwen_base.txt", "qwen_advanced.txt",
+        "qwen_zero_shot_chain_of_thought.txt",
+        "qwen_random1.txt", "qwen_random2.txt", "qwen_random3.txt",
+        "qwen_random4.txt", "qwen_random5.txt",
+        "qwen_semantic_random1.txt", "qwen_semantic_random2.txt",
+        "qwen_semantic_random3.txt", "qwen_semantic_random4.txt",
+        "qwen_semantic_random5.txt",
+        "qwen_semantic_top_to_bottom.txt", "qwen_semantic_bottom_to_top.txt",
+        "qwen_thematic_random1.txt", "qwen_thematic_random2.txt",
+        "qwen_thematic_random3.txt", "qwen_thematic_random4.txt",
+        "qwen_thematic_random5.txt",
+        "qwen_thematic_top_to_bottom.txt", "qwen_thematic_bottom_to_top.txt",
+        "mixtral_base.txt", "mixtral_advanced.txt",
+        "mixtral_zero_shot_chain_of_thought.txt",
+        "mixtral_random1.txt", "mixtral_random2.txt", "mixtral_random3.txt",
+        "mixtral_random4.txt", "mixtral_random5.txt",
+        "mixtral_semantic_random1.txt", "mixtral_semantic_random2.txt",
+        "mixtral_semantic_random3.txt", "mixtral_semantic_random4.txt",
+        "mixtral_semantic_random5.txt",
+        "mixtral_semantic_top_to_bottom.txt",
+        "mixtral_semantic_bottom_to_top.txt",
+        "mixtral_thematic_random1.txt", "mixtral_thematic_random2.txt",
+        "mixtral_thematic_random3.txt", "mixtral_thematic_random4.txt",
+        "mixtral_thematic_random5.txt",
+        "mixtral_thematic_top_to_bottom.txt",
+        "mixtral_thematic_bottom_to_top.txt",
     ]
 
     # Rearrange columns
@@ -524,15 +641,19 @@ def analyze_prompt_effectiveness(
         if isinstance(df, pd.DataFrame):
             results_df = df
         # Or if it's a nested dictionary
-        elif isinstance(df, dict) and all(isinstance(v, dict) for v in df.values()):
+        elif isinstance(df, dict) \
+                and all(isinstance(v, dict) for v in df.values()):
             # Convert from dictionary to DataFrame
             all_prompts = set().union(*[d.keys() for d in df.values()])
             results_df = pd.DataFrame.from_dict(
-                {prob: {prompt: df[prob].get(prompt, 0) for prompt in all_prompts} 
-                 for prob in df}, 
+                {prob:
+                 {prompt: df[prob].get(prompt, 0) for prompt in all_prompts}
+                 for prob in df},
                 orient='index'
             )
         else:
-            raise TypeError("df must be either a DataFrame or a nested dictionary")
+            raise TypeError(
+                "df must be either a DataFrame or a nested dictionary"
+            )
 
     return run_complete_analysis(results_df, log_path)
