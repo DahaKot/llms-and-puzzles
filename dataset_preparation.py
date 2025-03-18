@@ -4,10 +4,6 @@ import torch
 from sentence_transformers import SentenceTransformer
 from torch.nn.functional import cosine_similarity  # type: ignore
 
-from cryptic_crosswords import CrypticCrosswords, CrypticCrosswordsTypes
-from logic_puzzles import LogicPuzzles
-from rosetta_stone import RosettaStone, RosettaStoneTypes
-
 
 class BaseDataset():
     def __init__(self, dataset_name, prompt_name, similarity="random",
@@ -139,20 +135,4 @@ class BaseDataset():
     def generate_prompt(self, example, prompt_name, similarity):
         pass
 
-
-def get_dataset_with_prompts(dataset_name, prompt_name="base",
-                             similarity="random", ranking="random", n_shots=0,
-                             random_seed=42):
-    datasets = {
-        "cryptic_crosswords": CrypticCrosswords,
-        "cryptic_crosswords_types": CrypticCrosswordsTypes,
-        "rosetta_stone": RosettaStone,
-        "rosetta_stone_types": RosettaStoneTypes, "logic_puzzles": LogicPuzzles
-    }
-
-    wrapped_dataset = datasets[dataset_name](
-        prompt_name, similarity, ranking, n_shots, random_seed
-    )
-
-    return wrapped_dataset
 
