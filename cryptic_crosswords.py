@@ -84,6 +84,40 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
             with_indices=True
         )
 
+    def generate_prompt(self, example, index, prompt_name):
+        clue = example['input']
+
+        if prompt_name == "deepseek_types":
+            example_type = None
+            for t in self.type_dict:
+                if index in self.type_dict[t]:
+                    example_type = t
+
+            if example_type:
+                prompt_name = "deepseek_" + example_type
+                prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+                example["prompt"] = prompt.format(clue=clue)
+            else:
+                raise TypeError(
+                    "coudnt find type of this example"
+                )
+
+            return example
+
+        prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+
+        if self.n_shots:
+            few_shot_examples = self.similarity(example, index)
+            example["prompt"] = prompt.format(clue=clue, **few_shot_examples)
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                clue=clue, answer=example["target"]
+            )
+        else:
+            example["prompt"] = prompt.format(clue=clue)
+
+        return example
+
     def _map_examples_to_dict(self, examples):
         data = {}
 

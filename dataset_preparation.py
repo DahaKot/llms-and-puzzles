@@ -31,7 +31,8 @@ class BaseDataset():
         if similarity in ["semantic", "thematic"]:
             self.embeddings = self._get_embeddings()
 
-        if self.similarity.__name__.startswith("thematic"):
+        if self.similarity.__name__.startswith("thematic") \
+           or prompt_name == "deepseek_types":
             self.type_dict = {}
             for i, example in enumerate(self.dataset):
                 type = example["type"]
