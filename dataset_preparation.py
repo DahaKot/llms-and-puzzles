@@ -528,6 +528,7 @@ class LogicPuzzles(BaseDataset):
 
     def check_answer_against_correct(self, prediction, correct_answer):
         prediction = prediction.replace("[", "").lower()
+        prediction = prediction.replace("*", "")
 
         match = re.search(r"answer:\s*(\S)", prediction)
         if not match:

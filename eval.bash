@@ -19,10 +19,10 @@ nvidia-smi
 dataset_name="logic_puzzles"
 batch_size=64
 max_tokens=512
-model="llama"
+model="qwen"
 similarity="thematic"
 
-python inference.py --run_name="logic_puzzles_llama_solutions_thematic_bottom_to_top" \
+python inference.py --run_name="logic_puzzles_qwen_solutions_thematic_bottom_to_top" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot_solutions" --n_gpus=1 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=32
