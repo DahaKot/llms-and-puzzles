@@ -16,15 +16,27 @@ echo "starting Evaluation......................."
 
 nvidia-smi
 
-dataset_name="logic_puzzles"
-batch_size=64
-max_tokens=512
-model="qwen"
-similarity="thematic"
+dataset_name="cryptic_crosswords"
+batch_size=256
+max_tokens=256
+model="llama"
+similarity="random"
 
-python inference.py --run_name="logic_puzzles_llama_solutions_thematic_bottom_to_top" \
+python inference.py --run_name="cryptic_crosswords_llama_deepseek" \
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
-    --prompt_name="5_shot_solutions" --n_gpus=1 --max_tokens=$max_tokens \
-    --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=32
+    --prompt_name="deepseek_advanced" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=32
+
+dataset_name="cryptic_crosswords_types"
+batch_size=256
+max_tokens=256
+model="llama"
+similarity="random"
+
+python inference.py --run_name="small_cryptic_crosswords_llama_deepseek" \
+    --batch_size=$batch_size --dataset=$dataset_name --model=$model \
+    --prompt_name="deepseek_advanced" --n_gpus=1 --max_tokens=$max_tokens \
+    --similarity=$similarity --ranking="random" --random_seed=32
+
 
 echo " ending " 
