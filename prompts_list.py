@@ -584,7 +584,7 @@ Possible answers:
 {options}
 [/INST]
 ''',
-"5_shot_solutions": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
+"5_shot_solutions_mixtral_instruct": '''[INST] You are a logic expert. You are given a logic puzzle along with several answer options. Solve the puzzle and provide only the letter of the correct option in the format: "answer: <option letter>".
 Examples:
 Puzzle:
 {problem1}
