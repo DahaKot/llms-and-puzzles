@@ -2,8 +2,8 @@ import csv
 import json
 
 from datasets import Dataset  # type: ignore
+import yaml  # type: ignore
 
-import prompts_list
 from dataset_preparation import BaseDataset
 from utils import replace_spans
 
@@ -13,6 +13,9 @@ class RosettaStone(BaseDataset):
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
         self.embedding_field = "data"
+
+        with open("rosetta_stone_prompts.yaml", "r") as file:
+            self.prompts = yaml.safe_load(file)
 
         self.modeling_raw = json.load(open(
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
@@ -46,7 +49,7 @@ class RosettaStone(BaseDataset):
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
         ))
 
-        prompt_builder = PromptBuilder(self.prompt_name)
+        prompt_builder = PromptBuilder()
         samples = []
 
         with open(
@@ -85,7 +88,7 @@ class RosettaStone(BaseDataset):
             "./data/rosetta_stone/LingOly_v9.json", "r", encoding="utf8"
         ))
 
-        prompt_builder = PromptBuilder(self.prompt_name)
+        prompt_builder = PromptBuilder()
         samples = []
 
         for d in dataset:
@@ -126,7 +129,7 @@ class RosettaStone(BaseDataset):
     def generate_prompt(self, example, index, prompt_name):
         data = example['data']
         question = example['question']
-        prompt = prompts_list.rosetta_stone_prompts[prompt_name]
+        prompt = self.prompts[prompt_name]
 
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
@@ -168,6 +171,9 @@ class RosettaStoneTypes(RosettaStone):
             n_shots=0, random_seed=42):
         self.embedding_field = "data"
 
+        with open("rosetta_stone_prompts.yaml", "r") as file:
+            self.prompts = yaml.safe_load(file)
+
         self.modeling_raw = json.load(open(
             "./data/rosetta_stone/ModeLing_v2.json", "r", encoding="utf8"
         ))
@@ -205,12 +211,50 @@ class RosettaStoneTypes(RosettaStone):
 
         return data
 
+    def generate_prompt(self, example, index, prompt_name):
+        data = example['data']
+        question = example['question']
+
+        if prompt_name == "deepseek_types":
+            example_type = None
+            for t in self.type_dict:
+                if index in self.type_dict[t]:
+                    example_type = t
+
+            if example_type:
+                prompt_name = "deepseek_" + example_type
+                prompt = self.prompts[prompt_name]
+                example["prompt"] = prompt.format(data=data, question=question)
+            else:
+                raise TypeError(
+                    "coudnt find type of this example"
+                )
+
+            return example
+
+        prompt = self.prompts[prompt_name]
+
+        if self.n_shots:
+            few_shot_examples = self.similarity(example, index)
+            example["prompt"] = prompt.format(
+                data=data, question=question, **few_shot_examples
+            )
+        elif prompt_name == "generate_solution":
+            example["prompt"] = prompt.format(
+                data=data, question=question,
+                answer=json.loads(example["target"])[0]
+            )
+        else:
+            example["prompt"] = prompt.format(data=data, question=question)
+
+        return example
+
 
 # the code is taken from KV Aditya Srivatsa and Mukund Choudhary
 class PromptBuilder:
-    def __init__(self, prompt_name):
-        self.task_prompt_template = \
-            prompts_list.rosetta_stone_prompts[prompt_name]
+    def __init__(self):
+        # self.task_prompt_template = \
+        #     prompts_list.rosetta_stone_prompts[prompt_name]
 
         self.data_text_template = \
             "<<SRC_LANG>>: \"<<SRC_TEXT>>\"\n<<TRG_LANG>>: \"<<TRG_TEXT>>\"\n"
@@ -227,22 +271,22 @@ class PromptBuilder:
 
         return data_text, question_text
 
-    def build_prompt_message(self, data, qna_row, qna_whole, **kwargs):
-        task_prompt = self.build_task_prompt(
-            data, qna_row, qna_whole, **kwargs
-        )
-        return task_prompt
+    # def build_prompt_message(self, data, qna_row, qna_whole, **kwargs):
+    #     task_prompt = self.build_task_prompt(
+    #         data, qna_row, qna_whole, **kwargs
+    #     )
+    #     return task_prompt
 
-    def build_task_prompt(self, data, qna_row, qna_whole=None, language=None):
-        data_text = self.build_data_text(data)
-        question_text = self.build_question_text(qna_row)
+    # def build_task_prompt(self, data, qna_row, qna_whole=None, language=None)
+    #     data_text = self.build_data_text(data)
+    #     question_text = self.build_question_text(qna_row)
 
-        span_dict = {
-            "<<DATA>>": data_text,
-            "<<QUESTION>>": question_text
-        }
-        task_prompt = replace_spans(self.task_prompt_template, span_dict)
-        return task_prompt
+    #     span_dict = {
+    #         "<<DATA>>": data_text,
+    #         "<<QUESTION>>": question_text
+    #     }
+    #     task_prompt = replace_spans(self.task_prompt_template, span_dict)
+    #     return task_prompt
 
     def build_data_text(self, data):
         data_text = ""

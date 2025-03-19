@@ -1,8 +1,8 @@
 import re
 
 from datasets import load_dataset  # type: ignore
+import yaml  # type: ignore
 
-import prompts_list
 from dataset_preparation import BaseDataset
 
 
@@ -19,6 +19,9 @@ class CrypticCrosswords(BaseDataset):
             random_seed
         )
 
+        with open("cryptic_crosswords_prompts.yaml", "r") as file:
+            self.prompts = yaml.safe_load(file)
+
         self.mapped_dataset = self.dataset.map(
             self.generate_prompt,
             fn_kwargs={"prompt_name": prompt_name},
@@ -28,7 +31,7 @@ class CrypticCrosswords(BaseDataset):
 
     def generate_prompt(self, example, index, prompt_name):
         clue = example['input']
-        prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+        prompt = self.prompts[prompt_name]
 
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
@@ -72,6 +75,9 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
         )["train"]
         self.embedding_field = "input"
 
+        with open("cryptic_crosswords_prompts.yaml", "r") as file:
+            self.prompts = yaml.safe_load(file)
+
         BaseDataset.__init__(
             self, "cryptic_crosswords", prompt_name, similarity, ranking,
             n_shots, random_seed
@@ -95,7 +101,7 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
 
             if example_type:
                 prompt_name = "deepseek_" + example_type
-                prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+                prompt = self.prompts[prompt_name]
                 example["prompt"] = prompt.format(clue=clue)
             else:
                 raise TypeError(
@@ -104,7 +110,7 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
 
             return example
 
-        prompt = prompts_list.cryptic_crosswords_prompts[prompt_name]
+        prompt = self.prompts[prompt_name]
 
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)

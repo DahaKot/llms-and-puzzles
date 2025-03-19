@@ -2,8 +2,8 @@ import re
 
 import pandas as pd
 from datasets import load_dataset  # type: ignore
+import yaml  # type: ignore
 
-import prompts_list
 from dataset_preparation import BaseDataset
 
 
@@ -11,6 +11,9 @@ class LogicPuzzles(BaseDataset):
     def __init__(
             self, prompt_name, similarity="random", ranking="random",
             n_shots=0, random_seed=42):
+        with open("logic_puzzles_prompts.yaml", "r") as file:
+            self.prompts = yaml.safe_load(file)
+
         self.dataset = load_dataset(
             'json', split="train",
             data_files='./data/puzzle_ben/PuzzleBen_testset_updated.json'
@@ -61,7 +64,6 @@ class LogicPuzzles(BaseDataset):
 
     def generate_prompt(self, example, index, prompt_name):
         problem = example["problem"]
-        prompt = prompts_list.logic_puzzles_prompts[prompt_name]
 
         example["possible_answers_string"] = self._generate_options_string(
             example
@@ -69,6 +71,27 @@ class LogicPuzzles(BaseDataset):
 
         letter_options = ["A", "B", "C", "D", "E"]
         example["target"] = letter_options[example["answer"] - 1]
+
+        if prompt_name == "deepseek_types":
+            example_type = example["type"]
+            # for t in self.type_dict:
+            #     if index in self.type_dict[t]:
+            #         example_type = t
+
+            if example_type:
+                prompt_name = "deepseek_" + example_type
+                prompt = self.prompts[prompt_name]
+                example["prompt"] = prompt.format(
+                    problem=problem, options=example["possible_answers_string"]
+                )
+            else:
+                raise TypeError(
+                    "coudnt find type of this example"
+                )
+
+            return example
+
+        prompt = self.prompts[prompt_name]
 
         if self.n_shots:
             few_shot_examples = self.similarity(example, index)
