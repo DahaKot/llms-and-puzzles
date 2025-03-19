@@ -29,8 +29,8 @@ def add_args(parser: argparse.ArgumentParser):
     parser.add_argument(
         "--prompt_name", type=str, default="base",
         choices=["base", "advanced", "zero_shot_chain_of_thought", "5_shot",
-                 "5_shot_solutions", "base_mixtral_instruct",
-                 "advanced_mixtral_instruct",
+                 "5_shot_solutions", "deepseek_advanced", "deepseek_types",
+                 "base_mixtral_instruct", "advanced_mixtral_instruct",
                  "zero_shot_chain_of_thought_mixtral_instruct",
                  "5_shot_mixtral_instruct",
                  "5_shot_solutions_mixtral_instruct", "generate_solution"]

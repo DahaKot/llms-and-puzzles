@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=mixtral_instruct_solutions # Job name
+#SBATCH --job-name=rosetta_stone_mixtral_icl_test # Job name
 #SBATCH --error=logs/%j%x.err # error file
 #SBATCH --output=logs/%j%x.out # output log file
 #SBATCH --nodes=1                   # Run all processes on a single node    
@@ -10,7 +10,7 @@
 #SBATCH -p cscc-gpu-p
 #SBATCH -q cscc-gpu-qos
 #SBATCH --gres=gpu:4              # Number of GPUs (per node)
-#SBATCH --time=10:00:00             # Specify the time needed for your experiment
+#SBATCH --time=06:00:00             # Specify the time needed for your experiment
 
 echo "starting Evaluation......................."
 
@@ -41,6 +41,5 @@ python inference.py --run_name="small_cryptic_crosswords_mixtral_solutions_thema
     --batch_size=$batch_size --dataset=$dataset_name --model=$model \
     --prompt_name="5_shot_solutions_mixtral_instruct" --n_gpus=4 --max_tokens=$max_tokens \
     --similarity=$similarity --ranking="semantic_bottom_to_top" --random_seed=3453
-
 
 echo " ending " 

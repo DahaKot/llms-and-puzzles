@@ -1,10 +1,32 @@
-from tqdm import tqdm
-from dataset_preparation import get_dataset_with_prompts
-from torch.utils.data import DataLoader
-from args_parser import get_args
-from vllm import LLM, SamplingParams
 import json
+
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from vllm import LLM, SamplingParams
+
+from args_parser import get_args
 from models_list import models_dict
+from cryptic_crosswords import CrypticCrosswords, CrypticCrosswordsTypes
+from logic_puzzles import LogicPuzzles
+from rosetta_stone import RosettaStone, RosettaStoneTypes
+
+
+def get_dataset_with_prompts(dataset_name, prompt_name="base",
+                             similarity="random", ranking="random", n_shots=0,
+                             random_seed=42):
+    datasets = {
+        "cryptic_crosswords": CrypticCrosswords,
+        "cryptic_crosswords_types": CrypticCrosswordsTypes,
+        "rosetta_stone": RosettaStone,
+        "rosetta_stone_types": RosettaStoneTypes, "logic_puzzles": LogicPuzzles
+    }
+
+    wrapped_dataset = datasets[dataset_name](
+        prompt_name, similarity, ranking, n_shots, random_seed
+    )
+
+    return wrapped_dataset
+
 
 if __name__ == "__main__":
     args = get_args()
