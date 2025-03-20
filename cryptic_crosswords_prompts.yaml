@@ -117,6 +117,13 @@ deepseek_anagram: |
   {clue}
   **Answer:**
 
+deepseek_short_anagram: |
+  To solve a cryptic anagram clue, first identify the definition (often at the start or end of the clue) and the wordplay. The wordplay will include an anagram indicator (e.g., "change," "shocking," "awkward") and a set of letters to rearrange. Extract the letters from the wordplay portion, ignoring punctuation and spaces, then anagram them to form the solution. Ensure the resulting word matches the definition in both meaning and length. Verify that all letters are used exactly once.  
+
+  **Clue:**  
+  {clue}  
+  **Answer:**
+
 deepseek_assemblage: |
   To solve this cryptic *assemblage* clue, follow these steps:  
   1. **Identify the definition**: This directly defines the answer, typically at the start or end of the clue.  
@@ -133,6 +140,13 @@ deepseek_assemblage: |
   {clue}
   **Answer:**
 
+deepseek_short_assemblage: |
+  To solve the cryptic clue, first identify the definition (often at the start or end) and the wordplay. Parse the wordplay for components like synonyms, abbreviations, letter positions (e.g., "fourth of X"), removals (e.g., "doesn’t start"), reversals, or hidden words. Combine these elements logically to form the answer, ensuring it aligns with the definition and letter count.  
+
+  **Clue:**  
+  {clue}  
+  **Answer:**
+
 deepseek_container: |
   To solve this cryptic *container* clue, follow these steps: 
   1. **Identify the definition**: Determine the part of the clue that directly defines the answer, usually positioned at the beginning or end.  
@@ -147,6 +161,13 @@ deepseek_container: |
   {clue}
   **Answer:**
 
+deepseek_short_container: |
+  To solve a cryptic container clue, identify words indicating insertion (e.g., "kept by," "in," "around"). Split the clue into two parts: the *container* (which surrounds) and the *containee* (which is inserted). Combine them by placing one part inside the other, ensuring the total letters match the answer length. Check for abbreviations, synonyms, or hidden words in either component.  
+
+  **Clue:**  
+  {clue}  
+  **Answer:**
+
 deepseek_double definition: |
   To solve a cryptic double definition clue, follow these steps:  
 
@@ -159,6 +180,13 @@ deepseek_double definition: |
   {clue}
   **Answer:**
 
+deepseek_short_double definition: |
+  A cryptic double definition clue requires a single word answer that has two distinct meanings. Each part of the clue directly hints at one of these meanings, and the answer must align with both definitions simultaneously. Consider the word's spelling, length (indicated in parentheses), and how both parts of the clue independently point to the same term. Analyze each segment of the clue to identify the dual-purpose word that satisfies both definitions.  
+
+  **Clue:**  
+  {clue}  
+  **Answer:**
+
 deepseek_hidden word: |
   To solve this cryptic *hidden word* clue, follow these steps:  
   1. **Identify the definition**: This directly defines the answer, often positioned at the start or end of the clue.  
@@ -169,6 +197,13 @@ deepseek_hidden word: |
   **Clue:**
   {clue}
   **Answer:**
+
+deepseek_short_hidden word: |
+  To solve the cryptic clue, first isolate the definition, which directly describes the answer. The wordplay component will indicate that the answer is embedded as a consecutive sequence of letters within one or more adjacent words in the clue. Carefully scan the text for hidden letter strings that match the definition and specified length. Confirm the answer by aligning both the definition and the concealed letter structure.  
+
+  Clue:  
+  {clue}  
+  Answer:
 
 base_mixtral_instruct: |
   [INST] You are a cryptic crossword expert. You are given a cryptic crossword clue. Solve the clue and provide only the answer.

@@ -100,7 +100,7 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
                     example_type = t
 
             if example_type:
-                prompt_name = "deepseek_" + example_type
+                prompt_name = "deepseek_short_" + example_type
                 prompt = self.prompts[prompt_name]
                 example["prompt"] = prompt.format(clue=clue)
             else:
