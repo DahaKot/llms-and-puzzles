@@ -132,6 +132,7 @@ def analyze_prompt_performance(results_df):
             # We're interested in cases where the prompts disagreed
             pos = np.sum((prompt1_results == 1) & (prompt2_results == 0))
             neg = np.sum((prompt1_results == 0) & (prompt2_results == 1))
+
             # For the diagonal, set p-value to 1 (same prompt)
             if i == j:
                 p_value_matrix[i, j] = 1.0
@@ -309,7 +310,6 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     ax.set_xlabel("Prompt B")
     ax.set_ylabel("Prompt A")
 
-    # Add an explanation text box
     # Add an explanation text box
     textstr = '''Positive value: Prompt A outperforms Prompt B' \
         'Negative value: Prompt B outperforms Prompt A' \
@@ -579,8 +579,12 @@ def analyze_prompt_effectiveness(
     Main entry point for analyzing prompt effectiveness
 
     Parameters:
+<<<<<<< HEAD
+    df: Either a DataFrame or dictionary mapping {problem_id: {prompt_id: 1 or 0}}
+=======
     df: Either a DataFrame or dictionary mapping
         {problem_id: {prompt_id: 1 or 0}}
+>>>>>>> e6673fda9f317101c5d71b7e28ee3c1ebec04d91
     problem_ids: List of problem IDs (optional if df provided)
     prompt_ids: List of prompt IDs (optional if df provided)
 
@@ -657,4 +661,5 @@ def analyze_prompt_effectiveness(
             )
 
     return run_complete_analysis(results_df, log_path)
+
 
