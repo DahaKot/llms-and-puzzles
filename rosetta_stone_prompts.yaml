@@ -99,6 +99,15 @@ deepseek_POSS: |
 
   Prioritize morphological logic, possessive agreement, and iterative validation to decode the correct structure.
 
+deepseek_short_POSS: |
+   Analyze the possessive morphology patterns between the languages by identifying how possessors and possessed nouns are marked. Determine the order of elements (possessor vs. possessed), any affixes or particles indicating possession, and how these markers change based on grammatical person (e.g., first, second, third), number, or noun class. Pay attention to whether possession is marked on the possessor, the possessed noun, or both, and note any irregularities. Use these patterns to infer the correct translation.  
+
+   Parallel sentences:  
+   {data}  
+
+   Sentence to translate:  
+   {question}
+
 deepseek_SEM: |
   Decipher the unknown semantic compounds by systematically analyzing morpheme alignment and meaning composition in the parallel texts. Follow these steps:  
 
@@ -129,6 +138,15 @@ deepseek_SEM: |
   {question}  
 
   Prioritize morpheme alignment, semantic consistency, and iterative validation to decode the correct compound meaning.
+
+deepseek_short_SEM: |
+   To solve this semantic alignment puzzle, analyze the provided parallel sentences to map non-English semantic components to their English equivalents. Identify the meaning of individual morphemes and the rules governing their combination, such as affixation, word order, and compounding. Use these insights to translate the target sentence by applying the identified structural and semantic patterns.  
+
+   Parallel sentences:  
+   {data}  
+
+   Sentence to translate:  
+   {question}
 
 deepseek_ORDER: |
   Decipher the unknown sentence by systematically analyzing the word order patterns in the parallel texts. Follow these steps:  
@@ -162,6 +180,15 @@ deepseek_ORDER: |
 
   Prioritize positional logic, syntactic consistency, and iterative validation to decode the correct word order.
 
+deepseek_short_ORDER: | 
+   To solve the word order puzzle, carefully analyze the structure of the parallel sentences to determine the correct order of subject (S), verb (V), and object (O) in the target language. Identify how each element (S, V, O) is positioned relative to the English translation. Focus on the arrangement of core components (e.g., who performs the action, the action itself, and the recipient/object of the action) across sentences. Apply the deduced word order pattern to translate the final sentence accurately.  
+
+   Parallel sentences:  
+   {data}  
+
+   Sentence to translate:  
+   {question}
+
 deepseek_NOUN-ADJ: |
   Decipher the unknown sentence by systematically analyzing the structural relationship between nouns and adjectives. Follow these steps:  
 
@@ -193,6 +220,15 @@ deepseek_NOUN-ADJ: |
     {question}
 
   Focus on positional patterns, role consistency, and rule validation to decode the correct noun-adjective order.
+
+deepseek_short_NOUN-ADJ: |
+   Analyze the parallel sentences to determine the structural rule governing the placement of nouns and adjectives in the target language. Identify whether adjectives precede or follow nouns by comparing the word order between the two languages. Use this rule to accurately translate the given sentence.  
+
+   Parallel sentences:  
+   {data}  
+
+   Sentence to translate:  
+   {question}
 
 5_shot: |
   You are a linguistic expert. You are given a Rosetta Stone puzzle containing several parallel sentences in two languages, followed by a new sentence to translate. Translate the sentence and provide only the answer.
