@@ -79,7 +79,8 @@ class LogicPuzzles(BaseDataset):
             #         example_type = t
 
             if example_type:
-                prompt_name = "deepseek_" + example_type
+                # prompt_name = "deepseek_" + example_type
+                prompt_name = "deepseek_short_" + example_type
                 prompt = self.prompts[prompt_name]
                 example["prompt"] = prompt.format(
                     problem=problem, options=example["possible_answers_string"]
