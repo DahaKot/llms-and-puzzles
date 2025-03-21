@@ -72,15 +72,21 @@ class LogicPuzzles(BaseDataset):
         letter_options = ["A", "B", "C", "D", "E"]
         example["target"] = letter_options[example["answer"] - 1]
 
-        if prompt_name == "deepseek_types":
+        if "types" in prompt_name:
             example_type = example["type"]
             # for t in self.type_dict:
             #     if index in self.type_dict[t]:
             #         example_type = t
 
             if example_type:
-                # prompt_name = "deepseek_" + example_type
-                prompt_name = "deepseek_short_" + example_type
+                if "short" in prompt_name:
+                    prompt_name = "deepseek_short_" + example_type
+                else:
+                    prompt_name = "deepseek_" + example_type
+
+                if "mixtral_instruct" in prompt_name:
+                    prompt_name += "_mixtral_instruct"
+
                 prompt = self.prompts[prompt_name]
                 example["prompt"] = prompt.format(
                     problem=problem, options=example["possible_answers_string"]

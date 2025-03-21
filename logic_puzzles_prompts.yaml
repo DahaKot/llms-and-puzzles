@@ -399,6 +399,16 @@ zero_shot_chain_of_thought_mixtral_instruct: |
   Let's think step by step.
   [/INST]
 
+generate_solution_mixtral_instruct: |
+  [INST] You are a logic expert. You are given a logic puzzle along with several answer options. The correct answer is given to you. Generate a valid reasoning chain that arrives at the correct answer.
+  Puzzle:
+  {problem}
+  Possible answers:
+  {options}
+  Answer:
+  {answer}
+  [/INST]
+
 advanced_mixtral_instruct: |
   [INST] You are a logic expert. You are given a logic puzzle with several answer options. Logic puzzles often require breaking the problem into smaller components, identifying patterns, applying rules or reasoning, and eliminating incorrect options to arrive at the solution.
   Solve the puzzle. Finally, provide the letter of the correct option in the format: "answer: <option letter>".
@@ -574,6 +584,17 @@ deepseek_brainteasers_mixtral_instruct: |
   [Correct Letter]
   [/INST]
 
+deepseek_short_brainteasers_mixtral_instruct: |
+  [INST] **Prompt:**  
+  Approach the puzzle by methodically analyzing each clue and its implications. Break down the problem into distinct components, identifying relationships, constraints, and contradictions. Evaluate how each answer option aligns with the given details, prioritizing logical consistency over assumptions. Eliminate choices that fail to address key elements or introduce irreconcilable conflicts with the puzzle's narrative or rules.  
+
+  Puzzle:  
+  {problem}  
+  Possible answers:  
+  {options}  
+  Answer:
+  [/INST]
+
 deepseek_cr_mixtral_instruct: |
   [INST] **To solve critical reasoning puzzles involving paradoxes, assumptions, and conclusions, apply this structured approach:**  
 
@@ -609,6 +630,17 @@ deepseek_cr_mixtral_instruct: |
   [Correct Letter]
   [/INST]
 
+deepseek_short_cr_mixtral_instruct: |
+  [INST] **Prompt:**  
+  Analyze the following logic puzzle by critically evaluating the argument's structure, assumptions, and potential paradoxes. Identify which answer choice most logically strengthens, weakens, or resolves the reasoning by addressing implicit premises, causal relationships, or contradictions. Discard irrelevant or secondary factors, focusing solely on how each option directly impacts the conclusion's validity.  
+
+  Puzzle:  
+  {problem}  
+  Possible answers:  
+  {options}  
+  Answer:
+  [/INST]
+
 deepseek_puzzles_mixtral_instruct: |
   [INST] **To solve logic puzzles involving analogies, sequences, or relational reasoning, apply this structured approach:**  
 
@@ -640,6 +672,17 @@ deepseek_puzzles_mixtral_instruct: |
 
   **Answer**:  
   [Correct Letter]
+  [/INST]
+
+deepseek_short_puzzles_mixtral_instruct: |
+  [INST] **Prompt:**  
+  Approach the puzzle by first identifying the core relationships or patterns presented. Break down each component of the problem systematically, applying deductive reasoning to eliminate inconsistent or illogical options. Verify that your chosen answer aligns with the structure of the question and adheres to the logical framework established by the given information.  
+
+  Puzzle:  
+  {problem}  
+  Possible answers:  
+  {options}  
+  Answer:
   [/INST]
 
 deepseek_riddles_mixtral_instruct: |
@@ -677,6 +720,17 @@ deepseek_riddles_mixtral_instruct: |
   [Correct Letter]
   [/INST]
 
+deepseek_short_riddles_mixtral_instruct: |
+  [INST] **Prompt:**  
+  To solve this riddle, carefully analyze each line for metaphors, wordplay, or dual meanings. Break down the components of the description, considering both literal and abstract interpretations. Identify key contradictions, patterns, or relationships between the clues. Cross-reference each possible answer against all elements of the riddle, prioritizing the option that aligns with the most layers of meaning and resolves any paradoxes logically.  
+
+  Puzzle:  
+  {problem}  
+  Possible answers:  
+  {options}  
+  Answer:
+  [/INST]
+
 deepseek_parajumble_mixtral_instruct: |
   [INST] **To solve parajumble puzzles requiring cause-effect analysis, apply this structured approach:**  
 
@@ -712,4 +766,15 @@ deepseek_parajumble_mixtral_instruct: |
 
   **Answer**:  
   [Correct Letter]
+  [/INST]
+
+deepseek_short_parajumble_mixtral_instruct: |
+  [INST] **Prompt:**  
+  To solve this parajumble puzzle, carefully analyze the logical flow between sentences, focusing on cause-effect relationships, chronological progression, and contextual clues such as pronouns or transitional phrases. Identify the sentence that establishes the primary event or premise, then determine which subsequent sentences logically expand, explain, or result from it. Ensure the sequence forms a coherent narrative by tracing how each action or idea leads to the next.  
+
+  Puzzle:  
+  {problem}  
+  Possible answers:  
+  {options}  
+  Answer:
   [/INST]

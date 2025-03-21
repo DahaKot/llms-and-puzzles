@@ -93,14 +93,21 @@ class CrypticCrosswordsTypes(CrypticCrosswords):
     def generate_prompt(self, example, index, prompt_name):
         clue = example['input']
 
-        if prompt_name == "deepseek_types":
+        if "types" in prompt_name:
             example_type = None
             for t in self.type_dict:
                 if index in self.type_dict[t]:
                     example_type = t
 
             if example_type:
-                prompt_name = "deepseek_short_" + example_type
+                if "short" in prompt_name:
+                    prompt_name = "deepseek_short_" + example_type
+                else:
+                    prompt_name = "deepseek_" + example_type
+
+                if "mixtral_instruct" in prompt_name:
+                    prompt_name += "_mixtral_instruct"
+
                 prompt = self.prompts[prompt_name]
                 example["prompt"] = prompt.format(clue=clue)
             else:
