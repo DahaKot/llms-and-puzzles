@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd  # type: ignore
 from scipy import stats  # type: ignore
+import json
 
 
-def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
+def plot_solved_by_type(dataset, predictions_filename):
     types = []
     for example in dataset:
         types.append(example["type"])
@@ -21,16 +22,10 @@ def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
 
     solving_given_puzzle = True
 
-    with open(prefix + predictions_filename + ".txt", 'r') as file:
+    # for not logic
+    with open(predictions_filename, 'r') as file:
         for line in file:
-            # Check if the line starts with "counted"
-            if line.startswith("Prediction: puzzle:"):
-                # print("solving a wrong puzzle ", types[i])
-                solving_given_puzzle = False
-
             if line.startswith('Counted?'):
-                if "True" in line and not solving_given_puzzle:
-                    print("ALARM")
                 # Split the line to extract the value (True/False)
                 if "True" in line and solving_given_puzzle:
                     correct_count += 1
@@ -40,11 +35,30 @@ def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
                 i += 1
                 solving_given_puzzle = True
 
-    plt.rcParams.update({'font.size': 18})
+    # # Read the JSON file
+    # with open(predictions_filename, 'r') as f:
+    #     json_data = json.load(f)
+
+    # # Extract the "is_correct" field from the "results" list
+    # counts = [1 if item.get("is_correct", False) else 0 
+    #           for item in json_data["results"]]
+
+    # for is_correct, puzzle_type in zip(counts, types):
+    #     if is_correct:
+    #         results[puzzle_type] += 1
+
+    results_percentage = {}
+    for puzzle_type in results:
+        results_percentage[puzzle_type] = results[puzzle_type] \
+            / counted_types[puzzle_type]
+
+    # plt.rcParams.update({'font.size': 18})
 
     # Extract categories and their respective accuracies
     # categories = list(results.keys())
-    correctly_solved = list(results.values())
+
+    # correctly_solved = list(results.values())
+    # correctly_solved = counts
 
     # Plot the bar chart
     # plt.figure(figsize=(10, 6))
@@ -78,7 +92,7 @@ def plot_solved_by_type(dataset, prefix, predictions_filename, plot_filename):
     # plt.savefig(prefix + plot_filename + "_" + predicitons_filename + ".png")
     # plt.show()
 
-    return correctly_solved
+    return results, results_percentage
 
 
 def analyze_prompt_performance(results_df):
@@ -198,7 +212,6 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
 
     # Create a figure
     fig = plt.figure(figsize=(20, 20))
-    plt.rcParams.update({'font.size': 10})
 
     # Create a custom colormap for significance levels
     # Colors for different significance thresholds
@@ -244,14 +257,14 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
                 # Diagonal case - no significance test
                 annot_matrix[i, j] = "—"
             else:
-                # if sign_val >= 0:
-                #     formatted_value = f"+{sign_val:.2f}{stars}"
-                # else:
-                #     formatted_value = f"{sign_val:.2f}{stars}"
                 if sign_val >= 0:
-                    formatted_value = f"+{pval:.2f}{stars}"
+                    formatted_value = f"+{sign_val:.2f}{stars}"
                 else:
-                    formatted_value = f"{pval:.2f}{stars}"
+                    formatted_value = f"{sign_val:.2f}{stars}"
+                # if sign_val >= 0:
+                #     formatted_value = f"+{pval:.2f}{stars}"
+                # else:
+                #     formatted_value = f"{pval:.2f}{stars}"
                 annot_matrix[i, j] = formatted_value
 
     # Create color matrix based on p-values
@@ -289,8 +302,8 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     # Set tick labels
     ax.set_xticks(np.arange(num_prompts))
     ax.set_yticks(np.arange(num_prompts))
-    ax.set_xticklabels(prompt_ids)
-    ax.set_yticklabels(prompt_ids)
+    ax.set_xticklabels([id[8:-4] for id in prompt_ids])
+    ax.set_yticklabels([id[8:-4] for id in prompt_ids])
 
     # Rotate x tick labels and set alignment
     plt.setp(
@@ -310,29 +323,31 @@ def visualize_prompt_performance(results_df, analysis_results, log_path):
     ax.set_xlabel("Prompt B")
     ax.set_ylabel("Prompt A")
 
+    font_size = 15
+
     # Add an explanation text box
-    textstr = '''Positive value: Prompt A outperforms Prompt B' \
-        'Negative value: Prompt B outperforms Prompt A' \
-        'Value represents proportion of disagreements' \
-        '* p≤0.05, ** p≤0.01, *** p≤0.001' \
-        '† Significant after Bonferroni correction'''
+    textstr = '''Positive value: Prompt A outperforms Prompt B\n \
+        Negative value: Prompt B outperforms Prompt A\n\n \
+        Value represents proportion of disagreements\n \
+        * p≤0.05, ** p≤0.01, *** p≤0.001\n \
+        † Significant after Bonferroni correction'''
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(0.5, -0.15, textstr, transform=ax.transAxes, fontsize=12,
+    ax.text(-0.1, -0.15, textstr, transform=ax.transAxes, fontsize=font_size,
             verticalalignment='top', bbox=props, horizontalalignment='center')
 
     # Set font sizes for different elements
-    plt.rcParams.update({'font.size': 10})  # Set base font size globally
+    plt.rcParams.update({'font.size': font_size})  # Set base fontsize globally
 
     # Adjust specific element font sizes
-    ax.set_title("Sign Test Results Between Prompts", fontsize=14)
-    ax.set_xlabel("Prompt B", fontsize=12)
-    ax.set_ylabel("Prompt A", fontsize=12)
+    ax.set_title("Sign Test Results Between Prompts", fontsize=font_size)
+    ax.set_xlabel("Prompt B", fontsize=font_size)
+    ax.set_ylabel("Prompt A", fontsize=font_size)
 
     # Adjust tick label font sizes
-    ax.tick_params(axis='both', which='major', labelsize=10)
+    ax.tick_params(axis='both', which='major', labelsize=font_size)
 
     # Adjust colorbar label font size
-    cbar.ax.tick_params(labelsize=10)
+    cbar.ax.tick_params(labelsize=font_size)
 
     plt.tight_layout()
     plt.savefig(log_path + "_sign_test_heatmap.pdf")
@@ -572,6 +587,46 @@ def process_files(directory, model):
     return df
 
 
+def process_files_json(directory, model):
+    # Get a list of all JSON files in the directory
+    files = [f for f in os.listdir(directory)
+             if f.endswith('full.json') and f.startswith(model)
+             and os.path.isfile(os.path.join(directory, f))]
+
+    # Initialize a dictionary to store data for the DataFrame
+    data = {}
+
+    for file_index, file_name in enumerate(files):
+        file_path = os.path.join(directory, file_name)
+
+        # Read the JSON file
+        with open(file_path, 'r') as f:
+            json_data = json.load(f)
+
+        # Extract the "is_correct" field from the "results" list
+        if "results" in json_data:
+            counts = [1 if item.get("is_correct", False) else 0
+                      for item in json_data["results"]]
+        else:
+            counts = []
+
+        # Add the counts as a column for the current file
+        data[file_name] = counts
+
+    # Determine the maximum number of entries across all files
+    max_entries = max(len(counts) for counts in data.values()) if data else 0
+
+    # Ensure all columns have the same number of rows by padding with NaN
+    for file_name in data:
+        while len(data[file_name]) < max_entries:
+            data[file_name].append(None)  # Use None for missing values
+
+    # Create a DataFrame
+    df = pd.DataFrame(data)
+
+    return df
+
+
 # Main function to be called with your data
 def analyze_prompt_effectiveness(
         directory, log_path, model, problem_ids=None, prompt_ids=None):
@@ -579,50 +634,63 @@ def analyze_prompt_effectiveness(
     Main entry point for analyzing prompt effectiveness
 
     Parameters:
-<<<<<<< HEAD
-    df: Either a DataFrame or dictionary mapping {problem_id: {prompt_id: 1 or 0}}
-=======
     df: Either a DataFrame or dictionary mapping
         {problem_id: {prompt_id: 1 or 0}}
->>>>>>> e6673fda9f317101c5d71b7e28ee3c1ebec04d91
     problem_ids: List of problem IDs (optional if df provided)
     prompt_ids: List of prompt IDs (optional if df provided)
 
     Returns:
     Complete analysis results
     # """
-    # directory = "./logs/little_rosetta_stone"
+    # df = process_files(directory, model)
     df = process_files(directory, model)
 
     # Optionally, save the DataFrame to a CSV file
     df.to_csv(log_path + ".csv", index=False)
+
     new_order = [
-        "llama_base.txt", "llama_advanced.txt",
-        "llama_zero_shot_chain_of_thought.txt",
-        "llama_random1.txt", "llama_random2.txt", "llama_random3.txt",
-        "llama_random4.txt", "llama_random5.txt",
-        "llama_semantic_random1.txt", "llama_semantic_random2.txt",
-        "llama_semantic_random3.txt", "llama_semantic_random4.txt",
-        "llama_semantic_random5.txt",
-        "llama_semantic_top_to_bottom.txt", "llama_semantic_bottom_to_top.txt",
-        "llama_thematic_random1.txt", "llama_thematic_random2.txt",
-        "llama_thematic_random3.txt", "llama_thematic_random4.txt",
-        "llama_thematic_random5.txt",
-        "llama_thematic_top_to_bottom.txt", "llama_thematic_bottom_to_top.txt",
-        "qwen_base.txt", "qwen_advanced.txt",
-        "qwen_zero_shot_chain_of_thought.txt",
-        "qwen_random1.txt", "qwen_random2.txt", "qwen_random3.txt",
-        "qwen_random4.txt", "qwen_random5.txt",
-        "qwen_semantic_random1.txt", "qwen_semantic_random2.txt",
-        "qwen_semantic_random3.txt", "qwen_semantic_random4.txt",
-        "qwen_semantic_random5.txt",
-        "qwen_semantic_top_to_bottom.txt", "qwen_semantic_bottom_to_top.txt",
-        "qwen_thematic_random1.txt", "qwen_thematic_random2.txt",
-        "qwen_thematic_random3.txt", "qwen_thematic_random4.txt",
-        "qwen_thematic_random5.txt",
-        "qwen_thematic_top_to_bottom.txt", "qwen_thematic_bottom_to_top.txt",
-        "mixtral_base.txt", "mixtral_advanced.txt",
-        "mixtral_zero_shot_chain_of_thought.txt",
+        # "llama_base.txt", "llama_advanced.txt",
+        # "llama_zero_shot_chain_of_thought.txt",
+        # "llama_deepseek_advanced.txt",
+        # "llama_deepseek_long_types.txt",
+        # "llama_deepseek_short_types.txt",
+
+        # "llama_random1.txt", "llama_random2.txt", "llama_random3.txt",
+        # "llama_random4.txt", "llama_random5.txt",
+        # "llama_semantic_random1.txt", "llama_semantic_random2.txt",
+        # "llama_semantic_random3.txt", "llama_semantic_random4.txt",
+        # "llama_semantic_random5.txt",
+        # "llama_semantic_top_to_bottom.txt", "llama_semantic_bottom_to_top.txt",
+        # "llama_thematic_random1.txt", "llama_thematic_random2.txt",
+        # "llama_thematic_random3.txt", "llama_thematic_random4.txt",
+        # "llama_thematic_random5.txt",
+        # "llama_thematic_top_to_bottom.txt", "llama_thematic_bottom_to_top.txt",
+        # "llama_deepseek_solutions.txt",
+
+        # "qwen_base.txt", "qwen_advanced.txt",
+        # "qwen_zero_shot_chain_of_thought.txt",
+        # "qwen_deepseek_advanced.txt",
+        # "qwen_deepseek_long_types.txt",
+        # "qwen_deepseek_short_types.txt",
+
+        # "qwen_random1.txt", "qwen_random2.txt", "qwen_random3.txt",
+        # "qwen_random4.txt", "qwen_random5.txt",
+        # "qwen_semantic_random1.txt", "qwen_semantic_random2.txt",
+        # "qwen_semantic_random3.txt", "qwen_semantic_random4.txt",
+        # "qwen_semantic_random5.txt",
+        # "qwen_semantic_top_to_bottom.txt", "qwen_semantic_bottom_to_top.txt",
+        # "qwen_thematic_random1.txt", "qwen_thematic_random2.txt",
+        # "qwen_thematic_random3.txt", "qwen_thematic_random4.txt",
+        # "qwen_thematic_random5.txt",
+        # "qwen_thematic_top_to_bottom.txt", "qwen_thematic_bottom_to_top.txt",
+        # "qwen_deepseek_solutions.txt",
+
+        # "mixtral_base.txt", "mixtral_advanced.txt",
+        # "mixtral_zero_shot_chain_of_thought.txt",
+        # "mixtral_deepseek_advanced.txt",
+        # "mixtral_deepseek_long_types.txt",
+        # "mixtral_deepseek_short_types.txt",
+
         "mixtral_random1.txt", "mixtral_random2.txt", "mixtral_random3.txt",
         "mixtral_random4.txt", "mixtral_random5.txt",
         "mixtral_semantic_random1.txt", "mixtral_semantic_random2.txt",
@@ -635,6 +703,72 @@ def analyze_prompt_effectiveness(
         "mixtral_thematic_random5.txt",
         "mixtral_thematic_top_to_bottom.txt",
         "mixtral_thematic_bottom_to_top.txt",
+        "mixtral_deepseek_solutions.txt",
+
+        # that's for logic puzzles
+        # "llama_base_accuracy_full.json", "llama_advanced_accuracy_full.json",
+        # "llama_zero_shot_chain_of_thought_accuracy_full.json",
+        # "llama_deepseek_advanced_accuracy_full.json",
+        # "llama_deepseek_long_types_accuracy_full.json",
+        # "llama_deepseek_short_types_proper_prompt_accuracy_full.json",
+
+        # "llama_random1_accuracy_full.json", "llama_random2_accuracy_full.json",
+        # "llama_random3_accuracy_full.json", "llama_random4_accuracy_full.json",
+        # "llama_random5_accuracy_full.json",
+        # "llama_semantic_random1_accuracy_full.json",
+        # "llama_semantic_random2_accuracy_full.json",
+        # "llama_semantic_random3_accuracy_full.json",
+        # "llama_semantic_random4_accuracy_full.json",
+        # "llama_semantic_random5_accuracy_full.json",
+        # "llama_semantic_top_to_bottom_accuracy_full.json",
+        # "llama_semantic_bottom_to_top_accuracy_full.json",
+        # "llama_thematic_random1_accuracy_full.json",
+        # "llama_thematic_random2_accuracy_full.json",
+        # "llama_thematic_random3_accuracy_full.json",
+        # "llama_thematic_random4_accuracy_full.json",
+        # "llama_thematic_random5_accuracy_full.json",
+        # "llama_thematic_top_to_bottom_accuracy_full.json",
+        # "llama_thematic_bottom_to_top_accuracy_full.json",
+        # "llama_deepseek_solutions_accuracy_full.json",
+
+        # "qwen_base_accuracy_full.json", "qwen_advanced_accuracy_full.json",
+        # "qwen_zero_shot_chain_of_thought_accuracy_full.json",
+        # "qwen_deepseek_advanced_accuracy_full.json",
+        # "qwen_deepseek_long_types_accuracy_full.json",
+        # "qwen_deepseek_short_types_proper_prompt_accuracy_full.json",
+
+
+        # "qwen_random1_accuracy_full.json", "qwen_random2_accuracy_full.json", "qwen_random3_accuracy_full.json",
+        # "qwen_random4_accuracy_full.json", "qwen_random5_accuracy_full.json",
+        # "qwen_semantic_random1_accuracy_full.json", "qwen_semantic_random2_accuracy_full.json",
+        # "qwen_semantic_random3_accuracy_full.json", "qwen_semantic_random4_accuracy_full.json",
+        # "qwen_semantic_random5_accuracy_full.json",
+        # "qwen_semantic_top_to_bottom_accuracy_full.json", "qwen_semantic_bottom_to_top_accuracy_full.json",
+        # "qwen_thematic_random1_accuracy_full.json", "qwen_thematic_random2_accuracy_full.json",
+        # "qwen_thematic_random3_accuracy_full.json", "qwen_thematic_random4_accuracy_full.json",
+        # "qwen_thematic_random5_accuracy_full.json",
+        # "qwen_thematic_top_to_bottom_accuracy_full.json", "qwen_thematic_bottom_to_top_accuracy_full.json",
+        # "qwen_deepseek_solutions_accuracy_full.json",
+
+        # "mixtral_base_accuracy_full.json", "mixtral_advanced_accuracy_full.json",
+        # "mixtral_zero_shot_chain_of_thought_accuracy_full.json",
+        # "mixtral_deepseek_advanced_accuracy_full.json",
+        # "mixtral_deepseek_long_types_accuracy_full.json",
+        # "mixtral_deepseek_short_types_accuracy_full.json",
+
+        # "mixtral_random1_accuracy_full.json", "mixtral_random2_accuracy_full.json", "mixtral_random3_accuracy_full.json",
+        # "mixtral_random4_accuracy_full.json", "mixtral_random5_accuracy_full.json",
+        # "mixtral_semantic_random1_accuracy_full.json", "mixtral_semantic_random2_accuracy_full.json",
+        # "mixtral_semantic_random3_accuracy_full.json", "mixtral_semantic_random4_accuracy_full.json",
+        # "mixtral_semantic_random5_accuracy_full.json",
+        # "mixtral_semantic_top_to_bottom_accuracy_full.json",
+        # "mixtral_semantic_bottom_to_top_accuracy_full.json",
+        # "mixtral_thematic_random1_accuracy_full.json", "mixtral_thematic_random2_accuracy_full.json",
+        # "mixtral_thematic_random3_accuracy_full.json", "mixtral_thematic_random4_accuracy_full.json",
+        # "mixtral_thematic_random5_accuracy_full.json",
+        # "mixtral_thematic_top_to_bottom_accuracy_full.json",
+        # "mixtral_thematic_bottom_to_top_accuracy_full.json",
+        # "mixtral_deepseek_solutions_accuracy_full.json",
     ]
 
     # Rearrange columns
@@ -661,5 +795,3 @@ def analyze_prompt_effectiveness(
             )
 
     return run_complete_analysis(results_df, log_path)
-
-
