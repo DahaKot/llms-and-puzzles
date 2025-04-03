@@ -77,7 +77,8 @@ class RosettaStone(BaseDataset):
                     "language": language,
                     "type": d["type"][0],
                     "question_number": len(samples),
-                    "solution": solutions_data[solutions_index][3]
+                    "solution": solutions_data[solutions_index][3],
+                    "difficulty": d["difficulty"]
                 })
                 solutions_index += 1
 
@@ -122,6 +123,7 @@ class RosettaStone(BaseDataset):
                     "type": "NONE",
                     "question_number": len(samples),
                     "solution": "",
+                    "difficulty": 0
                 })
 
         return samples

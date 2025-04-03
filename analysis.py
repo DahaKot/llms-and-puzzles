@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd  # type: ignore
 from scipy import stats  # type: ignore
 import json
+from scipy.stats import wilcoxon
+from scipy.stats import binomtest
 
 
 def plot_solved_by_type(dataset, predictions_filename):
@@ -93,6 +95,89 @@ def plot_solved_by_type(dataset, predictions_filename):
     # plt.show()
 
     return results, results_percentage
+
+
+def wilcoxon_test(data, columns1, columns2):
+    # Calculate average performance per example for each approach
+    data['first_avg'] = data[columns1].mean(axis=1)
+    data['second_avg'] = data[columns2].mean(axis=1)
+    # data['zero_shot_avg'] = data[columns1].max(axis=1)
+    # data['few_shot_avg'] = data[columns2].max(axis=1)
+
+    # Calculate differences
+    data['difference'] = data['first_avg'] - data['second_avg']
+
+    # Apply Wilcoxon test
+    result = wilcoxon(data['first_avg'], data['second_avg'])
+    print(f"Wilcoxon test statistic: {result.statistic}")
+    print(f"p-value: {result.pvalue}")
+
+    # Check which approach performed better
+    if data['difference'].mean() > 0:
+        better = "FIRST prompting"
+    else:
+        better = "SECOND prompting"
+
+    print(f"Wilcoxon test On average, {better} performed better")
+    return result.pvalue
+
+
+def sign_test(data, columns1, columns2):
+    # Calculate average performance per example for each approach
+    data['first_avg'] = data[columns1].mean(axis=1)
+    data['second_avg'] = data[columns2].mean(axis=1)
+
+    # Calculate differences
+    data['difference'] = data['first_avg'] - data['second_avg']
+
+    # Count positive, negative, and zero differences
+    n_positive = (data['difference'] > 0).sum()
+    n_negative = (data['difference'] < 0).sum()
+
+    # Total number of non-zero differences
+    n = n_positive + n_negative
+
+    # Apply sign test (binomial test with p=0.5)
+    # We test whether the proportion of positive differences significantly differs from 0.5
+    result = binomtest(n_positive, n, p=0.5)
+    print(f"p-value: {result.pvalue}")
+    # Check which approach performed better
+    if n_positive > n_negative:
+        better = "FIRST prompting"
+    else:
+        better = "SECOND prompting"
+
+    print(f"Sign test On average, {better} performed better")
+
+    return result.pvalue
+
+
+def get_columns_from_list(data, prompts, model=None):
+    columns = []
+    for c in data.columns:
+        for prompt in prompts:
+            if ((model and c.startswith(model)) or not model) and prompt in c:
+                if "deepseek" in prompt and "deepseek" in c \
+                   or not ("deepseek" in prompt or "deepseek" in c):
+                    columns.append(c)
+                    break
+    print("prompts and columns: ", len(prompts), len(columns))
+    return columns
+
+
+def compare_two_groups(data, prompts1, prompts2, model=None):
+    """
+    This function conducts significance testing for two groups of experiments,
+    unlike analyze_prompt_effectiveness that compares experiments one by one.
+    """
+    columns1 = get_columns_from_list(data, prompts1, model)
+    columns2 = get_columns_from_list(data, prompts2, model)
+
+    w_pvalue = wilcoxon_test(data, columns1, columns2)
+    print("================")
+    s_pvalue = sign_test(data, columns1, columns2)
+
+    return w_pvalue, s_pvalue
 
 
 def analyze_prompt_performance(results_df):
@@ -632,7 +717,8 @@ def analyze_prompt_effectiveness(
         directory, log_path, model, problem_ids=None, prompt_ids=None):
     """
     Main entry point for analyzing prompt effectiveness
-
+    Plots heatmaps for significance testing comparing experiments one by one.
+    
     Parameters:
     df: Either a DataFrame or dictionary mapping
         {problem_id: {prompt_id: 1 or 0}}
